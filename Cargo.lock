@@ -812,6 +812,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "quickdraw"
+version = "0.1.0"
+dependencies = [
+ "glium",
+ "winit",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1072,13 +1080,6 @@ name = "ttf-parser"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17f77d76d837a7830fe1d4f12b7b4ba4192c1888001c7164257e4bc6d21d96b4"
-
-[[package]]
-name = "twinstick_racer"
-version = "0.1.0"
-dependencies = [
- "glium",
-]
 
 [[package]]
 name = "unicode-ident"
