@@ -1,4 +1,4 @@
-use crate::{glium_generics::generics::Vertex, Normal};
+use crate::generics::{Vertex, Normal};
 pub const VERTICES: [Vertex; 531] = [
     Vertex { position: (0.0, 0.0, 0.0) },   // dummy vector because in the original model indices
                                             // start at 1

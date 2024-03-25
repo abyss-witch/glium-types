@@ -1,6 +1,6 @@
 #version 140
 
-out vec4 colour;
+out vec4 colour;    
 in vec3 v_normal;
 in vec3 v_position;
 

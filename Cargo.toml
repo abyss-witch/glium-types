@@ -1,19 +1,15 @@
 [package]
-name = "quickdraw"
+name = "glium_generics"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "glium_generics"
+path = "src/lib.rs"
+test = true
+crate-type = ["lib"]
+
 [dependencies]
 glium = "0.34.0"
-image = "0.24.8"
-winit = "0.29.10"
-
-[profile.release]
-lto = "fat"
-opt-level = "z"
-codegen-units = 1
-strip = true
-panic ="abort"
-windows_subsystem = "windows"
