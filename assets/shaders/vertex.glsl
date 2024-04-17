@@ -18,7 +18,7 @@ void main() {
     vertex_colour = colour;
     uv = texture_coords;
     mat4 model_view = inverse(camera) * model;
-    v_normal =  inverse(mat3(model_view)) * normal;
+    v_normal = normal * transpose(inverse(mat3(model_view)));
     gl_Position = view * model_view * vec4(position, 1.0);
     v_position = gl_Position.xyz / gl_Position.w;
 }

@@ -1,6 +1,6 @@
 use glium::uniforms::AsUniformValue;
 
-use crate::{vec3::Vec3, prelude::vec3, quaternion::Quaternion};
+use crate::{mat3::Mat3, prelude::vec3, quaternion::Quaternion, vectors::vec3::Vec3};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 ///a matrix often used for transformations in glium.
@@ -42,7 +42,7 @@ impl Mat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    pub const fn from_scale_and_pos(pos: Vec3, scale: Vec3) -> Self{
+    pub const fn from_pos_and_scale(pos: Vec3, scale: Vec3) -> Self{
         Mat4::from_values(
             scale.x, 0.0, 0.0, pos.x,
             0.0, scale.y, 0.0, pos.y,
@@ -115,6 +115,9 @@ impl Mat4{
     pub const fn row(&self, pos: usize) -> [f32; 4]{
         let matrix = self.matrix;
         [matrix[0][pos], matrix[1][pos], matrix[2][pos], matrix[3][pos]]
+    }
+    pub fn position(&self) -> Vec3{
+        vec3(self[3][0], self[3][1], self[3][2])
     }
 }
 impl Default for Mat4{
@@ -191,6 +194,23 @@ impl std::ops::SubAssign for Mat4{
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self + rhs
     }
+}
+impl From<Mat3> for Mat4{
+    fn from(value: Mat3) -> Self {
+        Self::from_values(
+            value[0][0], value[0][1], value[0][2], 0.0,
+            value[1][0], value[1][1], value[1][2], 0.0,
+            value[2][0], value[2][1], value[2][2], 0.0,
+            0.0, 0.0, 0.0, 1.0
+        )
+    }
+}
+impl std::ops::Index<usize> for Mat4{
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.matrix[index]
+    }
+    
+    type Output = [f32; 4];
 }
 fn dot_vec4(a: [f32; 4], b: [f32; 4]) -> f32{
     a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]

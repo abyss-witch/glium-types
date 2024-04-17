@@ -48,13 +48,13 @@ implement_vertex!(VertexColour, colour);
 macro_rules! mesh {
     ($display: expr, $indices: expr, $( $x: expr ),*) => {
         {
-            use glium::index::PrimitiveType;
+            use glium::{index::PrimitiveType, IndexBuffer, VertexBuffer};
             let display = $display;
             (
                 IndexBuffer::new(display, PrimitiveType::TrianglesList, $indices).unwrap(),
                 $(
                     VertexBuffer::new(display, $x).unwrap(),
-                )*
+                )*                
             )
         }
     }
