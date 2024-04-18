@@ -1,6 +1,7 @@
 use glium::uniforms::AsUniformValue;
-
 use crate::{prelude::Mat4, quaternion::Quaternion, vectors::vec3::Vec3};
+
+use super::Mat2;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 ///a matrix often used for transformations in glium.
@@ -36,6 +37,7 @@ impl Mat3{
     ///creates a matrix with the following values.
     ///
     /// ```
+    /// use glium_types::matrices::Mat3;
     /// let new_matrix = Mat3::from_values(
     ///     1.0, 0.0, 0.0,
     ///     0.0, 1.0, 0.0,
@@ -119,7 +121,7 @@ impl std::ops::Mul for Mat3{
         let mut matrix = [[0.0; 3];  3];
         for x in 0..3{
             for y in 0..3{
-                matrix[x][y] = dot_vec3(self.row(y), rhs.column(x));
+                matrix[x][y] = Vec3::dot(self.row(y).into(), rhs.column(x).into());
             }
         }
         Self {
@@ -185,6 +187,15 @@ impl From<Mat4> for Mat3{
         )
     }
 }
+impl From<Mat2> for Mat3{
+    fn from(value: Mat2) -> Self {
+        Self::from_values(
+            value[0][0], value[0][1], 0.0,
+            value[1][0], value[1][1], 0.0,
+            0.0, 0.0, 1.0
+        )
+    }
+}
 impl std::ops::Index<usize> for Mat3{
     fn index(&self, index: usize) -> &Self::Output {
         &self.matrix[index]
@@ -192,11 +203,6 @@ impl std::ops::Index<usize> for Mat3{
     
     type Output = [f32; 3];
 }
-
-fn dot_vec3(a: [f32; 3], b: [f32; 3]) -> f32{
-    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-}
-
 #[test]
 fn test_inverse(){
     let mut a = Mat3::from_values(

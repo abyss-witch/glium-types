@@ -1,7 +1,9 @@
-use crate::{mat3::Mat3, mat4::Mat4, vectors::vec3::Vec3};
+use derive_cmp_ops::{CmpAdd, CmpAddAssign, CmpNeg, CmpSub, CmpSubAssign};
 
-#[derive(Clone, Copy)]
-///a 4 part vector often used to represent rotations.
+use crate::{matrices::Mat3, matrices::Mat4, vectors::vec3::Vec3};
+
+#[derive(Clone, Copy, CmpAdd, CmpSub, CmpAddAssign, CmpSubAssign, CmpNeg)]
+///a 4 part vector often used to represent rotations. note that multiplication of quaternions is applying transformations.
 pub struct Quaternion{
     pub r: f32,
     pub i: f32,
@@ -9,18 +11,22 @@ pub struct Quaternion{
     pub k: f32
 }
 impl Quaternion{
+    ///rotation around the x axis in radians
     pub fn from_x_rotation(angle: f32) -> Self{
         let a = angle / 2.0;
         Self { r: a.cos(), i: a.sin(), j: 0.0, k: 0.0 }
     }
+    ///rotation around the y axis in radians
     pub fn from_y_rotation(angle: f32) -> Self{
         let a = angle / 2.0;
         Self { r: a.cos(), i: 0.0, j: a.sin(), k: 0.0 }
     }
+    ///rotation around the z axis in radians
     pub fn from_z_rotation(angle: f32) -> Self{
         let a = angle / 2.0;
         Self { r: a.cos(), i: 0.0, j: 0.0, k: a.sin() }
     }
+    //rotation around the inputed axis in radians
     pub fn from_axis_rotation(angle: f32, axis: Vec3) -> Self{
         let a = angle / 2.0;
         Self{
@@ -62,32 +68,6 @@ impl std::ops::Mul for Quaternion{
             i: a.r*b.i + a.i*b.r + a.j*b.k - a.k*b.j, 
             j: a.r*b.j - a.i*b.k + a.j*b.r + a.k*b.i, 
             k: a.r*b.k + a.i*b.j - a.j*b.i + a.k*b.r
-        }
-    }
-    type Output = Self;
-}
-impl std::ops::Add for Quaternion{
-    fn add(self, rhs: Self) -> Self::Output {
-        let a = self;
-        let b = rhs;
-        Self { 
-            r: a.r + b.r,
-            i: a.i + b.i,
-            j: a.j + b.j,
-            k: a.k + b.k
-        }
-    }
-    type Output = Self;
-}
-impl std::ops::Sub for Quaternion{
-    fn sub(self, rhs: Self) -> Self::Output {
-        let a = self;
-        let b = rhs;
-        Self { 
-            r: a.r - b.r,
-            i: a.i - b.i,
-            j: a.j - b.j,
-            k: a.k - b.k
         }
     }
     type Output = Self;
