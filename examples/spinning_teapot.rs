@@ -32,7 +32,7 @@ fn main(){
             Event::AboutToWait => {
                 let time = time.elapsed().as_secs_f32();
                 let mut frame = display.draw();
-                let view = Mat4::view_matix(frame.get_dimensions(), 1.0, 1024.0, 0.1);
+                let view = Mat4::view_matrix(frame.get_dimensions(), 1.0, 1024.0, 0.1);
                 let camera = Mat4::from_pos(vec3(0.0, 0.0, -20.0));
                 
                 // multiplying quaternions is equivelant to transformations,

@@ -1,6 +1,6 @@
 use derive_cmp_ops::{CmpAdd, CmpAddAssign, CmpNeg, CmpSub, CmpSubAssign};
 
-use crate::{matrices::Mat3, matrices::Mat4, vectors::vec3::Vec3};
+use crate::{matrices::Mat3, matrices::Mat4, vectors::Vec3};
 
 #[derive(Clone, Copy, CmpAdd, CmpSub, CmpAddAssign, CmpSubAssign, CmpNeg)]
 ///a 4 part vector often used to represent rotations. note that multiplication of quaternions is applying transformations.

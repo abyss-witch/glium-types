@@ -58,7 +58,7 @@ impl Vec4{
     pub fn scale(self, scalar: f32) -> Vec4{
         Self::new(self.x * scalar, self.y * scalar, self.z * scalar, self.w * scalar)
     }
-    ///makes the length of the vector equal to 1. on fail returns vec3 of zeros
+    ///makes the length of the vector equal to 1. on fail returns vec4 of zeros
     pub fn normalise(self) -> Self{
         let length = self.length();
         if length == 0.0 { return vec4(0.0, 0.0, 0.0, 0.0); }

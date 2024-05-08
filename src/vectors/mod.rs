@@ -1,6 +1,12 @@
-pub mod vec2;
-pub mod vec3;
-pub mod vec4;
+mod vec2;
+mod vec3;
+mod vec4;
 pub use vec2::{Vec2, vec2};
 pub use vec3::{Vec3, vec3};
 pub use vec4::{Vec4, vec4};
+mod dvec2;
+mod dvec3;
+mod dvec4;
+pub use dvec2::{DVec2, dvec2};
+pub use dvec3::{DVec3, dvec3};
+pub use dvec4::{DVec4, dvec4};

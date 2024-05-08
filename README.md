@@ -1,7 +1,7 @@
 # glium-types
 this is a crate designed to include all the things you need to start working with glium.
 it includes:
-- vectors for 2-4 dimesnions
+- vectors and double vectors for 2-4 dimesnions
 - square_matrices for 2-4 dimensions
 - quaternions
 - vertex types: vertices, normals, vertex colours and texturecoords.
@@ -24,7 +24,7 @@ fn main(){
 
     let (indices, verts, norms) = mesh!(&display, &teapot::INDICES, &teapot::VERTICES, &teapot::NORMALS);
     let program = Program::from_source(&display, shaders::VERTEX,
-"   #version 140
+    "#version 140
     out vec4 colour;
     in vec3 v_normal;
 
@@ -45,7 +45,7 @@ fn main(){
             Event::AboutToWait => {
                 let time = time.elapsed().as_secs_f32();
                 let mut frame = display.draw();
-                let view = Mat4::view_matix(frame.get_dimensions(), 1.0, 1024.0, 0.1);
+                let view = Mat4::view_matrix(frame.get_dimensions(), 1.0, 1024.0, 0.1);
                 let camera = Mat4::from_pos(vec3(0.0, 0.0, -20.0));
                 
                 // multiplying quaternions is equivelant to transformations,

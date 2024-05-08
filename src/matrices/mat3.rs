@@ -1,5 +1,5 @@
 use glium::uniforms::AsUniformValue;
-use crate::{prelude::Mat4, quaternion::Quaternion, vectors::vec3::Vec3};
+use crate::{matrices::Mat4, quaternion::Quaternion, vectors::Vec3};
 
 use super::Mat2;
 

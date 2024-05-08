@@ -1,6 +1,6 @@
 use glium::uniforms::AsUniformValue;
 
-use crate::{matrices::Mat3, prelude::{vec3, Vec4}, quaternion::Quaternion, vectors::vec3::Vec3};
+use crate::{matrices::Mat3, prelude::{vec3, Vec4}, quaternion::Quaternion, vectors::Vec3};
 
 use super::Mat2;
 
@@ -75,7 +75,7 @@ impl Mat4{
         rot.into()
     }
     ///creates a 3d perspective matrix. known as `view` in the vertex shader.
-    pub fn view_matix(window_dimesnsions: (u32, u32), fov: f32, zfar: f32, znear: f32) -> Self{
+    pub fn view_matrix(window_dimesnsions: (u32, u32), fov: f32, zfar: f32, znear: f32) -> Self{
         let (width, height) = window_dimesnsions;
         let aspect_ratio = height as f32 / width as f32;
         let f = 1.0 / (fov / 2.0).tan();
@@ -89,7 +89,7 @@ impl Mat4{
         }
     }
     ///creates a 2d perspective matrix. known as `view` in the vertex shader.
-    pub fn orthagraphic_view_matix(window_dimesnsions: (u32, u32)) -> Self{
+    pub fn orthagraphic_view_matrix(window_dimesnsions: (u32, u32)) -> Self{
         let (width, height) = window_dimesnsions;
         let aspect_ratio = height as f32 / width as f32;
         Mat4::from_scale(vec3(aspect_ratio, 1.0, 1.0))
