@@ -441,7 +441,7 @@ dependencies = [
 
 [[package]]
 name = "glium-types"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "derive-cmp-ops",
  "glium",
