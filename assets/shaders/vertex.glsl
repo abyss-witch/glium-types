@@ -17,8 +17,9 @@ uniform mat4 view;
 void main() {
     v_colour = colour;
     uv = texture_coords;
-    mat4 model_view = inverse(camera) * model;
-    v_normal = inverse(transpose(mat3(model_view))) * normal;
-    gl_Position = view * model_view * vec4(position, 1.0);
+    mat4 model_view = view * model;
+    mat3 norm_mat = inverse(mat3(view * model));
+    v_normal = norm_mat * normal;
+    gl_Position = model_view * inverse(camera) * vec4(position, 1.0);
     v_position = gl_Position.xyz / gl_Position.w;
 }
