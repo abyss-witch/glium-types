@@ -1,5 +1,5 @@
 use glium::uniforms::AsUniformValue;
-use crate::{matrices::Mat4, quaternion::Quaternion, vectors::Vec3};
+use crate::{matrices::Mat4, quaternion::Quaternion, vectors::{Vec3, Vec2}};
 
 use super::Mat2;
 
@@ -20,6 +20,13 @@ impl Mat3{
             x, 0.0, 0.0,
             0.0, y, 0.0,
             0.0, 0.0, z,
+        )
+    }
+    pub fn from_2d_transform(pos: Vec2, scale: Vec2, rot: f32) -> Self {
+        Self::from_values(
+            scale.x * rot.cos(), scale.y * -rot.sin(), pos.x,
+            scale.x * rot.sin(), scale.y * rot.cos(), pos.y,
+            0.0, 0.0, 1.0
         )
     }
     pub fn from_transform(scale: Vec3, rot: Quaternion) -> Self{
@@ -45,6 +52,7 @@ impl Mat3{
     /// );
     /// assert!(new_matrix == Mat3::IDENTITY);
     /// ```
+    #[allow(clippy::too_many_arguments)]
     pub const fn from_values(
         a: f32, b: f32, c: f32,
         d: f32, e: f32, f: f32,
@@ -116,11 +124,12 @@ impl Default for Mat3{
     }
     
 }
+#[allow(clippy::needless_range_loop)]
 impl std::ops::Mul for Mat3{
     fn mul(self, rhs: Self) -> Self::Output {
         let mut matrix = [[0.0; 3];  3];
-        for x in 0..3{
-            for y in 0..3{
+        for x in 0..3 {
+            for y in 0..3 {
                 matrix[x][y] = Vec3::dot(self.row(y).into(), rhs.column(x).into());
             }
         }
@@ -156,26 +165,38 @@ impl std::ops::Add for Mat3{
 }
 impl std::ops::AddAssign for Mat3{
     fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs
+        let a = self.matrix;
+        let b = rhs.matrix;
+        *self = Self{
+            matrix:[
+                [a[0][0] + b[0][0], a[0][1] + b[0][1], a[0][2] + b[0][2]],
+                [a[1][0] + b[1][0], a[1][1] + b[1][1], a[1][2] + b[1][2]],
+                [a[2][0] + b[2][0], a[2][1] + b[2][1], a[2][2] + b[2][2]],
+            ]
+        };
     }
 }
 impl std::ops::Sub for Mat3{
     fn sub(self, rhs: Self) -> Self::Output {
         let a = self.matrix;
         let b = rhs.matrix;
-        Self{
-            matrix:[
+        Self { matrix:[
                 [a[0][0] - b[0][0], a[0][1] - b[0][1], a[0][2] - b[0][2]],
                 [a[1][0] - b[1][0], a[1][1] - b[1][1], a[1][2] - b[1][2]],
                 [a[2][0] - b[2][0], a[2][1] - b[2][1], a[2][2] - b[2][2]],
-            ]
-        }
+        ] }
     }
     type Output = Self;
 }
 impl std::ops::SubAssign for Mat3{
     fn sub_assign(&mut self, rhs: Self) {
-        *self = *self + rhs
+        let a = self.matrix;
+        let b = rhs.matrix;
+        *self = Self { matrix:[
+                [a[0][0] - b[0][0], a[0][1] - b[0][1], a[0][2] - b[0][2]],
+                [a[1][0] - b[1][0], a[1][1] - b[1][1], a[1][2] - b[1][2]],
+                [a[2][0] - b[2][0], a[2][1] - b[2][1], a[2][2] - b[2][2]],
+        ] };
     }
 }
 impl From<Mat4> for Mat3{
@@ -193,6 +214,16 @@ impl From<Mat2> for Mat3{
             value[0][0], value[0][1], 0.0,
             value[1][0], value[1][1], 0.0,
             0.0, 0.0, 1.0
+        )
+    }
+}
+impl From<Quaternion> for Mat3 {
+    fn from(value: Quaternion) -> Mat3 {
+        let Quaternion { r, i, j, k } = value;
+        Mat3::from_values(
+            1.0 - 2.0*(j*j + k*k), 2.0*(i*j - k*r), 2.0*(i*k + j*r),
+            2.0*(i*j + k*r), 1.0 - 2.0*(i*i + k*k), 2.0*(j*k - i*r),
+            2.0*(i*k - j*r), 2.0*(j*k + i*r), 1.0 - 2.0*(i*i + j*j)
         )
     }
 }

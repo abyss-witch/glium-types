@@ -62,6 +62,16 @@ impl Mat2{
             c * scalar, d * scalar
         )
     }
+    pub fn transpose(self) -> Self{
+        let Mat2 { matrix: [
+            [a, c],
+            [b, d]
+        ] } = self;
+        Mat2::from_values(
+            a, c,
+            b, d
+        )
+    }
     pub fn determinant(&self) -> f32{
         let Mat2 { matrix: [
             [a, c],
@@ -99,12 +109,13 @@ impl Default for Mat2{
     }
     
 }
+#[allow(clippy::needless_range_loop)]
 impl std::ops::Mul for Mat2{
     fn mul(self, rhs: Self) -> Self::Output {
         let mut matrix = [[0.0; 2]; 2];
-        for x in 0..2{
-            for y in 0..2{
-                matrix[x][y] = dot_vec2(self.row(y), rhs.column(x));
+        for x in 0..2 {
+            for y in 0..2 {
+                matrix[x][y] = Vec2::dot(self.row(y).into(), rhs.column(x).into());
             }
         }
         Self {
@@ -147,10 +158,6 @@ impl std::ops::Index<usize> for Mat2{
     type Output = [f32; 2];
 }
 
-fn dot_vec2(a: [f32; 2], b: [f32; 2]) -> f32{
-    a[0] * b[0] + a[1] * b[1]
-}
-
 #[test]
 fn test_inverse(){
     let mut a = Mat2::from_values(
@@ -184,7 +191,14 @@ impl std::ops::Add for Mat2{
 }
 impl std::ops::AddAssign for Mat2{
     fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs
+        let a = self.matrix;
+        let b = rhs.matrix;
+        *self = Self{
+            matrix:[
+                [a[0][0] + b[0][0], a[0][1] + b[0][1]],
+                [a[1][0] + b[1][0], a[1][1] + b[1][1]]
+            ]
+        };
     }
 }
 impl std::ops::Sub for Mat2{
@@ -202,6 +216,6 @@ impl std::ops::Sub for Mat2{
 }
 impl std::ops::SubAssign for Mat2{
     fn sub_assign(&mut self, rhs: Self) {
-        *self = *self + rhs
+        *self = *self - rhs
     }
 }

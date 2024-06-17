@@ -1,7 +1,7 @@
 use derive_cmp_ops::CmpOps;
 use glium::uniforms::AsUniformValue;
 use crate::prelude::Mat4;
-use super::dvec3::{dvec3, DVec3};
+use super::{vec4::Vec4, dvec3::{dvec3, DVec3}};
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
 ///a vector made from a x, y, z and w coordinate.
 pub struct DVec4{
@@ -76,6 +76,16 @@ impl DVec4{
 impl AsUniformValue for DVec4{
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::DoubleVec4([self.x, self.y, self.z, self.w])
+    }
+}
+impl From<Vec4> for DVec4 {
+    fn from(value: Vec4) -> Self {
+        Self { x: value.x as f64, y: value.y as f64, z: value.z as f64, w: value.w as f64 }
+    }
+}
+impl From<(f64, f64, f64, f64)> for DVec4 {
+    fn from(value: (f64, f64, f64, f64)) -> Self {
+        Self { x: value.0, y: value.1, z: value.2, w: value.3 }
     }
 }
 impl From<[f64; 4]> for DVec4 {

@@ -1,9 +1,10 @@
 use derive_cmp_ops::{CmpAdd, CmpAddAssign, CmpNeg, CmpSub, CmpSubAssign};
 
-use crate::{matrices::Mat3, matrices::Mat4, vectors::Vec3};
+use crate::vectors::Vec3;
 
-#[derive(Clone, Copy, CmpAdd, CmpSub, CmpAddAssign, CmpSubAssign, CmpNeg)]
-///a 4 part vector often used to represent rotations. note that multiplication of quaternions is applying transformations.
+#[derive(Clone, Copy, CmpAdd, CmpSub, CmpAddAssign, CmpSubAssign, CmpNeg, Debug, PartialEq)]
+///a 4 part vector often used to represent rotations. note that multiplication of quaternions
+///is applying transformations.
 pub struct Quaternion{
     pub r: f32,
     pub i: f32,
@@ -26,7 +27,7 @@ impl Quaternion{
         let a = angle / 2.0;
         Self { r: a.cos(), i: 0.0, j: 0.0, k: a.sin() }
     }
-    //rotation around the inputed axis in radians
+    ///rotation around the inputed axis in radians
     pub fn from_axis_rotation(angle: f32, axis: Vec3) -> Self{
         let a = angle / 2.0;
         Self{
@@ -36,26 +37,19 @@ impl Quaternion{
             k: a.sin() * axis.z,
         }
     }
-}
-impl Into<Mat4> for Quaternion{
-    fn into(self) -> Mat4 {
-        let (r, i, j, k) = (self.r, self.i, self.j, self.k);
-        Mat4::from_values(
-            1.0 - 2.0*(j*j + k*k), 2.0*(i*j - k*r), 2.0*(i*k + j*r), 0.0,
-            2.0*(i*j + k*r), 1.0 - 2.0*(i*i + k*k), 2.0*(j*k - i*r), 0.0,
-            2.0*(i*k - j*r), 2.0*(j*k + i*r), 1.0 - 2.0*(i*i + j*j), 0.0,   
-            0.0, 0.0, 0.0, 1.0
-        )
-    }
-}
-impl Into<Mat3> for Quaternion{
-    fn into(self) -> Mat3 {
-        let (r, i, j, k) = (self.r, self.i, self.j, self.k);
-        Mat3::from_values(
-            1.0 - 2.0*(j*j + k*k), 2.0*(i*j - k*r), 2.0*(i*k + j*r),
-            2.0*(i*j + k*r), 1.0 - 2.0*(i*i + k*k), 2.0*(j*k - i*r),
-            2.0*(i*k - j*r), 2.0*(j*k + i*r), 1.0 - 2.0*(i*i + j*j)
-        )
+    ///get innverse of a quaternion. panics if all quaternions values are 0
+    pub fn inverse(self) -> Self {
+        let Quaternion { r, i, j, k } = self;
+        if r == 0.0 && i == 0.0 && j == 0.0 && k == 0.0 {
+            panic!("tried to get inverse of zero quaternion");
+        }
+        let scalar = r*r + i*i + j*j + k*k;
+        Self {
+            r: r / scalar,
+            i: -i / scalar,
+            j: -j / scalar,
+            k: -k / scalar
+        }
     }
 }
 
@@ -71,4 +65,10 @@ impl std::ops::Mul for Quaternion{
         }
     }
     type Output = Self;
+}
+#[test]
+fn quaternion_inverse() {
+    let a = Quaternion::from_x_rotation(3.0);
+    let inv_a = a.inverse();
+    assert!(a * inv_a == Quaternion { r: 1.0, i: 0.0, j: 0.0, k: 0.0 });
 }

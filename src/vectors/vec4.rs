@@ -83,6 +83,11 @@ impl From<[f32; 4]> for Vec4 {
         Self { x: value[0], y: value[1], z: value[2], w: value[3] }
     }
 }
+impl From<(f32, f32, f32, f32)> for Vec4 {
+    fn from(value: (f32, f32, f32, f32)) -> Self {
+        Self { x: value.0, y: value.1, z: value.2, w: value.3 }
+    }
+}
 ///create a vector with an x, y, z and w coordinate.
 pub const fn vec4(x: f32, y: f32, z: f32, w: f32) -> Vec4{
     Vec4 { x, y, z, w }

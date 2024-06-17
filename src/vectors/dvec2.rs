@@ -2,7 +2,7 @@ use derive_cmp_ops::CmpOps;
 use glium::uniforms::AsUniformValue;
 use crate::matrices::Mat2;
 
-use super::dvec3::{dvec3, DVec3};
+use super::{dvec3::{dvec3, DVec3}, vec2::Vec2};
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
 ///a vector made from a x and y coordinate.
 pub struct DVec2{
@@ -78,9 +78,19 @@ impl AsUniformValue for DVec2{
 pub const fn dvec2(x: f64, y: f64) -> DVec2{
     DVec2 { x, y }
 }
+impl From<Vec2> for DVec2 {
+    fn from (value: Vec2) -> Self {
+        dvec2(value.x as f64, value.y as f64)
+    }
+}
 impl From<[f64; 2]> for DVec2 {
     fn from(value: [f64; 2]) -> Self {
         dvec2(value[0], value[1])
+    }
+}
+impl From<(f64, f64)> for DVec2 {
+    fn from(value: (f64, f64)) -> Self {
+        dvec2(value.0, value.1)
     }
 }
 impl From<[f32; 2]> for DVec2 {

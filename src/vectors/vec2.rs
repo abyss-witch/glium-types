@@ -83,3 +83,8 @@ impl From<[f32; 2]> for Vec2 {
         vec2(value[0], value[1])
     }
 }
+impl From<(f32, f32)> for Vec2 {
+    fn from(value: (f32, f32)) -> Self {
+        vec2(value.0, value.1)
+    }
+}
