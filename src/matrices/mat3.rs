@@ -106,6 +106,18 @@ impl Mat3{
             C, -(a*h - b*g), a*e - b*d
         ).scale(scalar)
     }
+    pub fn transpose(self) -> Self {
+        let Mat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = self;
+        Mat3::from_values(
+            a, d, g,
+            b, e, h,
+            c, f, i
+        )
+    }
     pub const fn column(&self, pos: usize) -> [f32; 3]{
         self.matrix[pos]
     }
