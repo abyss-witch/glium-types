@@ -3,7 +3,7 @@ use glium::uniforms::AsUniformValue;
 use crate::prelude::Mat4;
 use super::{vec4::Vec4, dvec3::{dvec3, DVec3}};
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
-///a vector made from a x, y, z and w coordinate.
+///a double vector made from a x, y, z and w coordinate.
 pub struct DVec4{
     pub x: f64,
     pub y: f64,

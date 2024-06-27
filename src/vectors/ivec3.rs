@@ -1,8 +1,8 @@
 use derive_cmp_ops::CmpOps;
 use glium::uniforms::AsUniformValue;
 use super::{vec3::Vec3, ivec2::{ivec2, IVec2}, ivec4::{ivec4, IVec4}};
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
-///a vector made from a x, y and z coordinate.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, CmpOps)]
+///an interger vector made from a x, y and z coordinate.
 pub struct IVec3 {
     pub x: i32,
     pub y: i32,
@@ -86,7 +86,7 @@ impl From<[i32; 3]> for IVec3 {
         Self { x: value[0], y: value[1], z: value[2] }
     }
 }
-///create a double vector with an x, y and z coordinate.
+///create an interger vector with an x, y and z coordinate.
 pub const fn ivec3(x: i32, y: i32, z: i32) -> IVec3{
     IVec3 { x, y, z }
 }

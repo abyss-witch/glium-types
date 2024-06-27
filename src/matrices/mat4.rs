@@ -292,7 +292,7 @@ impl std::ops::Index<usize> for Mat4{
 }
 #[test]
 fn test_from_inverse_transform() {
-    let rot = Quaternion::from_x_rotation(1.3);
+    let rot = Quaternion::from_x_rot(1.3);
     let pos = vec3(1.0, 2.0, 0.3);
     let scale = vec3(1.1, 2.0, 3.9);
     let transform = Mat4::from_transform(pos, scale, rot);
@@ -302,7 +302,7 @@ fn test_from_inverse_transform() {
 }
 #[test]
 fn test_transform(){
-    let rot = Quaternion::from_x_rotation(1.3);
+    let rot = Quaternion::from_x_rot(1.3);
     let pos = vec3(1.0, 2.0, 0.3);
     let scale = vec3(1.1, 2.0, 3.9);
     let transform = Mat4::from_transform(pos, scale, rot);

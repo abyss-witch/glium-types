@@ -2,7 +2,7 @@ use derive_cmp_ops::CmpOps;
 use glium::uniforms::AsUniformValue;
 
 use super::{ivec3::{ivec3, IVec3}, vec2::Vec2};
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, CmpOps)]
 ///an interger vector made from a x and y coordinate.
 pub struct IVec2{
     pub x: i32,

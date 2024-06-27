@@ -12,23 +12,24 @@ pub struct Quaternion{
     pub k: f32
 }
 impl Quaternion{
+    pub const IDENTITY: Self = Self { r: 1.0, i: 0.0, j: 0.0, k: 0.0 };
     ///rotation around the x axis in radians
-    pub fn from_x_rotation(angle: f32) -> Self{
+    pub fn from_x_rot(angle: f32) -> Self{
         let a = angle / 2.0;
         Self { r: a.cos(), i: a.sin(), j: 0.0, k: 0.0 }
     }
     ///rotation around the y axis in radians
-    pub fn from_y_rotation(angle: f32) -> Self{
+    pub fn from_y_rot(angle: f32) -> Self{
         let a = angle / 2.0;
         Self { r: a.cos(), i: 0.0, j: a.sin(), k: 0.0 }
     }
     ///rotation around the z axis in radians
-    pub fn from_z_rotation(angle: f32) -> Self{
+    pub fn from_z_rot(angle: f32) -> Self{
         let a = angle / 2.0;
         Self { r: a.cos(), i: 0.0, j: 0.0, k: a.sin() }
     }
     ///rotation around the inputed axis in radians
-    pub fn from_axis_rotation(angle: f32, axis: Vec3) -> Self{
+    pub fn from_axis_rot(angle: f32, axis: Vec3) -> Self{
         let a = angle / 2.0;
         Self{
             r: a.cos(),
@@ -68,7 +69,7 @@ impl std::ops::Mul for Quaternion{
 }
 #[test]
 fn quaternion_inverse() {
-    let a = Quaternion::from_x_rotation(3.0);
+    let a = Quaternion::from_x_rot(3.0);
     let inv_a = a.inverse();
     assert!(a * inv_a == Quaternion { r: 1.0, i: 0.0, j: 0.0, k: 0.0 });
 }
