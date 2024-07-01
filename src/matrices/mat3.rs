@@ -126,6 +126,7 @@ impl Mat3{
         [matrix[0][pos], matrix[1][pos], matrix[2][pos]]
     }
 }
+
 impl Default for Mat3{
     fn default() -> Self {
         Self { matrix: [
@@ -245,6 +246,11 @@ impl std::ops::Index<usize> for Mat3{
     }
     
     type Output = [f32; 3];
+}
+impl std::ops::IndexMut<usize> for Mat3{
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.matrix[index]
+    }
 }
 #[test]
 fn test_inverse(){

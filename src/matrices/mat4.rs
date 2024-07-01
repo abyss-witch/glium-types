@@ -165,15 +165,76 @@ impl Mat4{
             ]
         }
     }
-    pub const fn column(&self, pos: usize) -> [f32; 4]{
+    pub const fn column(&self, pos: usize) -> [f32; 4] {
         self.matrix[pos]
     }
-    pub const fn row(&self, pos: usize) -> [f32; 4]{
+    pub const fn row(&self, pos: usize) -> [f32; 4] {
         let matrix = self.matrix;
         [matrix[0][pos], matrix[1][pos], matrix[2][pos], matrix[3][pos]]
     }
-    pub fn position(&self) -> Vec3{
+    pub fn position(&self) -> Vec3 {
         vec3(self[3][0], self[3][1], self[3][2])
+    }
+    pub fn determinant(self) -> f32 {
+        let a = self;
+        let s0 = a[0][0] * a[1][1] - a[1][0] * a[0][1];
+        let s1 = a[0][0] * a[1][2] - a[1][0] * a[0][2];
+        let s2 = a[0][0] * a[1][3] - a[1][0] * a[0][3];
+        let s3 = a[0][1] * a[1][2] - a[1][1] * a[0][2];
+        let s4 = a[0][1] * a[1][3] - a[1][1] * a[0][3];
+        let s5 = a[0][2] * a[1][3] - a[1][2] * a[0][3];
+
+        let c5 = a[2][2] * a[3][3] - a[3][2] * a[2][3];
+        let c4 = a[2][1] * a[3][3] - a[3][1] * a[2][3];
+        let c3 = a[2][1] * a[3][2] - a[3][1] * a[2][2];
+        let c2 = a[2][0] * a[3][3] - a[3][0] * a[2][3];
+        let c1 = a[2][0] * a[3][2] - a[3][0] * a[2][2];
+        let c0 = a[2][0] * a[3][1] - a[3][0] * a[2][1];
+
+        s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0
+    }
+    /// get inverse of matrix. useful for camera.
+    pub fn inverse(self) -> Self {
+        let a = self;
+        let s0 = a[0][0] * a[1][1] - a[1][0] * a[0][1];
+        let s1 = a[0][0] * a[1][2] - a[1][0] * a[0][2];
+        let s2 = a[0][0] * a[1][3] - a[1][0] * a[0][3];
+        let s3 = a[0][1] * a[1][2] - a[1][1] * a[0][2];
+        let s4 = a[0][1] * a[1][3] - a[1][1] * a[0][3];
+        let s5 = a[0][2] * a[1][3] - a[1][2] * a[0][3];
+
+        let c5 = a[2][2] * a[3][3] - a[3][2] * a[2][3];
+        let c4 = a[2][1] * a[3][3] - a[3][1] * a[2][3];
+        let c3 = a[2][1] * a[3][2] - a[3][1] * a[2][2];
+        let c2 = a[2][0] * a[3][3] - a[3][0] * a[2][3];
+        let c1 = a[2][0] * a[3][2] - a[3][0] * a[2][2];
+        let c0 = a[2][0] * a[3][1] - a[3][0] * a[2][1];
+
+        let invdet = 1.0 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
+
+        let mut b = Mat4::IDENTITY;
+        
+        b[0][0] = ( a[1][1] * c5 - a[1][2] * c4 + a[1][3] * c3) * invdet;
+        b[0][1] = (-a[0][1] * c5 + a[0][2] * c4 - a[0][3] * c3) * invdet;
+        b[0][2] = ( a[3][1] * s5 - a[3][2] * s4 + a[3][3] * s3) * invdet;
+        b[0][3] = (-a[2][1] * s5 + a[2][2] * s4 - a[2][3] * s3) * invdet;
+
+        b[1][0] = (-a[1][0] * c5 + a[1][2] * c2 - a[1][3] * c1) * invdet;
+        b[1][1] = ( a[0][0] * c5 - a[0][2] * c2 + a[0][3] * c1) * invdet;
+        b[1][2] = (-a[3][0] * s5 + a[3][2] * s2 - a[3][3] * s1) * invdet;
+        b[1][3] = ( a[2][0] * s5 - a[2][2] * s2 + a[2][3] * s1) * invdet;
+
+        b[2][0] = ( a[1][0] * c4 - a[1][1] * c2 + a[1][3] * c0) * invdet;
+        b[2][1] = (-a[0][0] * c4 + a[0][1] * c2 - a[0][3] * c0) * invdet;
+        b[2][2] = ( a[3][0] * s4 - a[3][1] * s2 + a[3][3] * s0) * invdet;
+        b[2][3] = (-a[2][0] * s4 + a[2][1] * s2 - a[2][3] * s0) * invdet;
+
+        b[3][0] = (-a[1][0] * c3 + a[1][1] * c1 - a[1][2] * c0) * invdet;
+        b[3][1] = ( a[0][0] * c3 - a[0][1] * c1 + a[0][2] * c0) * invdet;
+        b[3][2] = (-a[3][0] * s3 + a[3][1] * s1 - a[3][2] * s0) * invdet;
+        b[3][3] = ( a[2][0] * s3 - a[2][1] * s1 + a[2][2] * s0) * invdet;
+
+        b
     }
 }
 impl Default for Mat4{
@@ -290,6 +351,11 @@ impl std::ops::Index<usize> for Mat4{
     
     type Output = [f32; 4];
 }
+impl std::ops::IndexMut<usize> for Mat4{
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.matrix[index]
+    }
+}
 #[test]
 fn test_from_inverse_transform() {
     let rot = Quaternion::from_x_rot(1.3);
@@ -299,6 +365,14 @@ fn test_from_inverse_transform() {
     let inv_transform = Mat4::from_inverse_transform(pos, scale, rot);
     let result = transform * inv_transform;
     assert!(eq_mats(Mat4::IDENTITY, result));
+}
+#[test]
+fn mat4_inverse() {
+    let rot = Quaternion::from_x_rot(1.3);
+    let pos = vec3(1.0, 2.0, 0.3);
+    let scale = vec3(1.1, 2.0, 3.9);
+    let a = Mat4::from_transform(pos, scale, rot);
+    assert!(eq_mats(Mat4::IDENTITY, a.inverse() * a));
 }
 #[test]
 fn test_transform(){

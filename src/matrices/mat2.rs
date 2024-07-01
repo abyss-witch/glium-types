@@ -157,7 +157,11 @@ impl std::ops::Index<usize> for Mat2{
     
     type Output = [f32; 2];
 }
-
+impl std::ops::IndexMut<usize> for Mat2{
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.matrix[index]
+    }
+}
 #[test]
 fn test_inverse(){
     let mut a = Mat2::from_values(
