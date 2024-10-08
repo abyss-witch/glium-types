@@ -76,7 +76,8 @@ impl VertexColour{
 implement_vertex!(VertexColour, colour);
 
 
-
+/// create a triangle mesh from a `Display`, `u32` indices followed by anything that can be stored
+/// in a vertex buffer
 #[macro_export]
 macro_rules! mesh {
     ($display: expr, $indices: expr, $( $x: expr ),*) => {

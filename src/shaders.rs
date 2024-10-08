@@ -2,6 +2,7 @@
 ///`view: Mat4` (`Mat4::view_matrix_3d()` or `Mat4::view_matrix_2d()`)
 ///and `camera: Mat4` (inverse camera matrix. use `Mat4::from_inverse_transform()` or call
 ///`inverse()` before feeding it to the shader)
+#[allow(clippy::too_long_first_doc_paragraph)]
 pub const VERTEX: &str = 
 "#version 140
 in vec3 position;

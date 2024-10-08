@@ -1,6 +1,6 @@
 [package]
 name = "glium-types"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/abss-witch/glium-types"
@@ -8,6 +8,9 @@ license = "MIT OR Apache-2.0 OR CC-BY-4.0"
 keywords = ["glium", "graphics", "math"]
 description = "types to use with glium"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+simd = []
 
 [lib]
 name = "glium_types"
@@ -20,7 +23,7 @@ name = "spinning_teapot"
 
 [dependencies]
 derive-cmp-ops = "0.1.0"
-glium = "0.34.0"
+glium = "0.35.0"
 
 [dev-dependencies]
-winit = "0.29.15"
+winit = "0.30.0"

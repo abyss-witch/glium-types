@@ -21,4 +21,4 @@ mod uvec3;
 mod uvec4;
 pub use uvec2::{UVec2, uvec2};
 pub use uvec3::{UVec3, uvec3};
-
+pub use uvec4::{UVec4, uvec4};

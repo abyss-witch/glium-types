@@ -236,6 +236,20 @@ impl Mat4{
 
         b
     }
+    pub fn scale(self, scalar: f32) -> Mat4 {
+        let Mat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = self;
+        Mat4::from_values(
+            a*scalar, b*scalar, c*scalar, d*scalar,
+            e*scalar, f*scalar, g*scalar, h*scalar,
+            i*scalar, j*scalar, k*scalar, l*scalar,
+            m*scalar, n*scalar, o*scalar, p*scalar
+        )
+    }
 }
 impl Default for Mat4{
     fn default() -> Self {
