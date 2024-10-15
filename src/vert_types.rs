@@ -77,7 +77,13 @@ implement_vertex!(VertexColour, colour);
 
 
 /// create a triangle mesh from a `Display`, `u32` indices followed by anything that can be stored
-/// in a vertex buffer
+/// in a vertex buffer e.g `Vertex` and/or `TextureCoords`
+/// ```no_run
+/// use glium_types::{mesh, teapot};
+/// let (indices, vertices) = mesh!(
+///     &display, &teapot::INDICES, &teapot::VERTICES
+/// );
+/// ```
 #[macro_export]
 macro_rules! mesh {
     ($display: expr, $indices: expr, $( $x: expr ),*) => {

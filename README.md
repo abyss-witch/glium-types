@@ -1,10 +1,12 @@
 # glium-types
-this is a crate designed to include all the things you need to start working with glium.
+this is a crate designed to include all the things you need to easly work with glium.
 it includes:
-- float, interger, unsigned interger and double vectors for 2-4 dimesnions
-- square matrices for 2-4 dimensions
-- quaternions
+- float, interger, unsigned interger with both regular and double vector variants for 2-4 dimesnions
+- square matrices and double square matrices for 2-4 dimensions
+- quaternions and double quaternions
 - vertex types: vertices, normals, vertex colours and texturecoords.
+
+thats all the uniform types supported by glium! (excluding ones already present in glium e.g textures)
 
 and to reduce boilerplate it also includes:
 - mesh macro
@@ -53,9 +55,9 @@ fn main(){
                 // multiplying quaternions is equivelant to transformations,
                 // so the bellow code will rotate around the z axis then x and then y.
                 // this also works for matrices
-                let rot = Quaternion::from_y_rot(time)
-                    * Quaternion::from_x_rot(time / 2.0)
-                    * Quaternion::from_z_rot(time / 4.0);
+                let rot = Quat::from_y_rot(time)
+                    * Quat::from_x_rot(time / 2.0)
+                    * Quat::from_z_rot(time / 4.0);
                 
                 //moves up 50.0 then scales and rotates.
                 let model = Mat4::from_rot(rot) * Mat4::from_scale(Vec3::splat(0.1))

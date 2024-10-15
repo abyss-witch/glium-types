@@ -38,9 +38,9 @@ fn main(){
                 // multiplying quaternions is equivelant to transformations,
                 // so the bellow code will rotate around the z axis then x and then y.
                 // this also works for matrices
-                let rot = Quaternion::from_y_rot(time)
-                    * Quaternion::from_x_rot(time / 2.0)
-                    * Quaternion::from_z_rot(time / 4.0);
+                let rot = Quat::from_y_rot(time)
+                    * Quat::from_x_rot(time / 2.0)
+                    * Quat::from_z_rot(time / 4.0);
                 
                 //moves up 50.0 then scales and rotates.
                 let model = Mat4::from_rot(rot) * Mat4::from_scale(Vec3::splat(0.1))
