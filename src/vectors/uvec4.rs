@@ -71,6 +71,16 @@ impl From<[u32; 4]> for UVec4 {
         Self { x: value[0], y: value[1], z: value[2], w: value[3] }
     }
 }
+impl From<UVec4> for [u32; 4] {
+    fn from(value: UVec4) -> Self {
+        [value.x, value.y, value.z, value.w]
+    }
+}
+impl From<UVec4> for (u32, u32, u32, u32) {
+    fn from(value: UVec4) -> Self {
+        (value.x, value.y, value.z, value.w)
+    }
+}
 ///create an unsigned interger vector with an x, y, z and w coordinate.
 pub const fn uvec4(x: u32, y: u32, z: u32, w: u32) -> UVec4{
     UVec4 { x, y, z, w }

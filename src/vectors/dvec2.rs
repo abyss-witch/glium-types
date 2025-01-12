@@ -103,3 +103,13 @@ impl From<[f32; 2]> for DVec2 {
         dvec2(value[0] as f64, value[1] as f64)
     }
 }
+impl From<DVec2> for [f64; 2] {
+    fn from(value: DVec2) -> Self {
+        [value.x, value.y]
+    }
+}
+impl From<DVec2> for (f64, f64) {
+    fn from(value: DVec2) -> Self {
+        (value.x, value.y)
+    }
+}

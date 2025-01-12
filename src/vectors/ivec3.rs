@@ -86,6 +86,16 @@ impl From<[i32; 3]> for IVec3 {
         Self { x: value[0], y: value[1], z: value[2] }
     }
 }
+impl From<IVec3> for [i32; 3] {
+    fn from(value: IVec3) -> Self {
+        [value.x, value.y, value.z]
+    }
+}
+impl From<IVec3> for (i32, i32, i32) {
+    fn from(value: IVec3) -> Self {
+        (value.x, value.y, value.z)
+    }
+}
 ///create an interger vector with an x, y and z coordinate.
 pub const fn ivec3(x: i32, y: i32, z: i32) -> IVec3{
     IVec3 { x, y, z }

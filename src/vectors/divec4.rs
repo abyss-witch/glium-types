@@ -70,6 +70,16 @@ impl From<[i64; 4]> for DIVec4 {
         Self { x: value[0], y: value[1], z: value[2], w: value[3] }
     }
 }
+impl From<DIVec4> for [i64; 4] {
+    fn from(value: DIVec4) -> Self {
+        [value.x, value.y, value.z, value.w]
+    }
+}
+impl From<DIVec4> for (i64, i64, i64, i64) {
+    fn from(value: DIVec4) -> Self {
+        (value.x, value.y, value.z, value.w)
+    }
+}
 ///create an interger vector with an x, y, z and w coordinate.
 pub const fn divec4(x: i64, y: i64, z: i64, w: i64) -> DIVec4{
     DIVec4 { x, y, z, w }

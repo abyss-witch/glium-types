@@ -78,3 +78,13 @@ impl From<(u64, u64)> for DUVec2 {
         duvec2(value.0, value.1)
     }
 }
+impl From<DUVec2> for [u64; 2] {
+    fn from(value: DUVec2) -> Self {
+        [value.x, value.y]
+    }
+}
+impl From<DUVec2> for (u64, u64) {
+    fn from(value: DUVec2) -> Self {
+        (value.x, value.y)
+    }
+}

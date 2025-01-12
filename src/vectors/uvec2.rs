@@ -73,3 +73,13 @@ impl From<(u32, u32)> for UVec2 {
         uvec2(value.0, value.1)
     }
 }
+impl From<UVec2> for [u32; 2] {
+    fn from(value: UVec2) -> Self {
+        [value.x, value.y]
+    }
+}
+impl From<UVec2> for (u32, u32) {
+    fn from(value: UVec2) -> Self {
+        (value.x, value.y)
+    }
+}

@@ -77,3 +77,13 @@ impl From<(i64, i64)> for DIVec2 {
         divec2(value.0, value.1)
     }
 }
+impl From<DIVec2> for [i64; 2] {
+    fn from(value: DIVec2) -> Self {
+        [value.x, value.y]
+    }
+}
+impl From<DIVec2> for (i64, i64) {
+    fn from(value: DIVec2) -> Self {
+        (value.x, value.y)
+    }
+}

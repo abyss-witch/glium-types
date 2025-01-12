@@ -98,6 +98,16 @@ impl From<[f32; 4]> for DVec4 {
         Self { x: value[0] as f64, y: value[1] as f64, z: value[2] as f64, w: value[3] as f64 }
     }
 }
+impl From<DVec4> for [f64; 4] {
+    fn from(value: DVec4) -> Self {
+        [value.x, value.y, value.z, value.w]
+    }
+}
+impl From<DVec4> for (f64, f64, f64, f64) {
+    fn from(value: DVec4) -> Self {
+        (value.x, value.y, value.z, value.w)
+    }
+}
 ///create a double vector with an x, y, z and w coordinate.
 pub const fn dvec4(x: f64, y: f64, z: f64, w: f64) -> DVec4{
     DVec4 { x, y, z, w }

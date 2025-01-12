@@ -92,6 +92,16 @@ impl From<[u64; 3]> for DUVec3 {
         Self { x: value[0], y: value[1], z: value[2] }
     }
 }
+impl From<DUVec3> for [u64; 3] {
+    fn from(value: DUVec3) -> Self {
+        [value.x, value.y, value.z]
+    }
+}
+impl From<DUVec3> for (u64, u64, u64) {
+    fn from(value: DUVec3) -> Self {
+        (value.x, value.y, value.z)
+    }
+}
 ///create an unsigned interger vector with an x, y and z coordinate.
 pub const fn duvec3(x: u64, y: u64, z: u64) -> DUVec3{
     DUVec3 { x, y, z }
