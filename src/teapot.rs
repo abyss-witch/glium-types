@@ -1,3 +1,6 @@
+//! A teapot 3d model for all your debugging needs. Taken from the glium tutorial
+//! (https://github.com/glium/glium/blob/master/book/tuto-07-teapot.rs)
+
 use crate::vert_types::{Vertex, Normal};
 pub const VERTICES: [Vertex; 531] = [
     Vertex { position: (0.0, 0.0, 0.0) },   // dummy vector because in the original model indices

@@ -4,17 +4,21 @@ use crate::{matrices::DMat4, quaternions::DQuat, vectors::{DVec3, DVec2}};
 use super::DMat2;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-///a double matrix often used for transformations in glium.
+/// a double matrix often used for transformations in glium.
 pub struct DMat3 {
     matrix: [[f64; 3]; 3]
 }
-impl DMat3{
+impl DMat3 {
     pub const IDENTITY: Self = DMat3::from_values(
         1.0, 0.0, 0.0,
         0.0, 1.0, 0.0,
         0.0, 0.0, 1.0,
     );
-    pub const fn from_scale(scale: DVec3) -> Self{
+    pub const fn from_column_major_array(array: [[f64; 3]; 3]) -> Self { Self { matrix: array } }
+    pub const fn into_column_major_array(self) -> [[f64; 3]; 3] { self.matrix }
+    pub const fn from_row_major_array(array: [[f64; 3]; 3]) -> Self { Self { matrix: array }.transpose() }
+    pub const fn into_row_major_array(self) -> [[f64; 3]; 3] { self.transpose().matrix }
+    pub const fn from_scale(scale: DVec3) -> Self {
         let (x, y, z) = (scale.x, scale.y, scale.z);
         DMat3::from_values(
             x, 0.0, 0.0,
@@ -29,7 +33,7 @@ impl DMat3{
             0.0, 0.0, 1.0
         )
     }
-    pub fn from_transform(scale: DVec3, rot: DQuat) -> Self{
+    pub fn from_transform(scale: DVec3, rot: DQuat) -> Self {
         let (r, i, j, k) = (rot.r, rot.i, rot.j, rot.k);
         let (sx, sy, sz) = (scale.x * 2.0, scale.y * 2.0, scale.z * 2.0);
         DMat3::from_values(
@@ -38,7 +42,7 @@ impl DMat3{
             sx*(i*k - j*r), sy*(j*k + i*r), sz*(0.5 - (i*i + j*j)) 
         )
     }
-    pub fn from_rot(rot: DQuat) -> Self{
+    pub fn from_rot(rot: DQuat) -> Self {
         rot.into()
     }
     ///creates a matrix with the following values.
@@ -57,9 +61,9 @@ impl DMat3{
         a: f64, b: f64, c: f64,
         d: f64, e: f64, f: f64,
         g: f64, h: f64, i: f64
-        ) -> Self{
+        ) -> Self {
         Self{
-            //opengl uses a diffent matrix format to the input. this is why the order is shifted.
+            // opengl uses a diffent matrix format to the input. this is why the order is shifted.
             matrix: [
                 [a, d, g],
                 [b, e, h],
@@ -67,7 +71,7 @@ impl DMat3{
             ]
         }
     }
-    pub fn scale(&self, scalar: f64) -> DMat3{
+    pub fn scale(&self, scalar: f64) -> DMat3 {
         let DMat3 { matrix: [
             [a, d, g],
             [b, e, h],
@@ -106,7 +110,7 @@ impl DMat3{
             C, -(a*h - b*g), a*e - b*d
         ).scale(scalar)
     }
-    pub fn transpose(self) -> Self {
+    pub const fn transpose(self) -> Self {
         let DMat3 { matrix: [
             [a, d, g],
             [b, e, h],
@@ -118,16 +122,16 @@ impl DMat3{
             c, f, i
         )
     }
-    pub const fn column(&self, pos: usize) -> [f64; 3]{
+    pub const fn column(&self, pos: usize) -> [f64; 3] {
         self.matrix[pos]
     }
-    pub const fn row(&self, pos: usize) -> [f64; 3]{
+    pub const fn row(&self, pos: usize) -> [f64; 3] {
         let matrix = self.matrix;
         [matrix[0][pos], matrix[1][pos], matrix[2][pos]]
     }
 }
 
-impl Default for DMat3{
+impl Default for DMat3 {
     fn default() -> Self {
         Self { matrix: [
             [1.0, 0.0, 0.0,],
@@ -135,7 +139,76 @@ impl Default for DMat3{
             [0.0, 0.0, 1.0,],
         ] }
     }
-    
+}
+impl std::ops::Mul<DVec3> for DMat3 {
+    fn mul(self, rhs: DVec3) -> Self::Output { rhs.transform(self) }
+    type Output = DVec3;
+}
+impl std::ops::Mul<DMat3> for f64 {
+    fn mul(self, rhs: DMat3) -> Self::Output { rhs * self }
+    type Output = DMat3;
+}
+impl std::ops::Mul<f64> for DMat3 {
+    fn mul(self, rhs: f64) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::MulAssign<f64> for DMat3 {
+    fn mul_assign(&mut self, rhs: f64) { *self = *self * rhs }
+}
+impl std::ops::Div<DMat3> for f64 {
+    fn div(self, rhs: DMat3) -> Self::Output {
+        let DMat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = rhs;
+        DMat3::from_values(
+            self/a, self/b, self/c,
+            self/d, self/e, self/f,
+            self/g, self/h, self/i
+        )
+    }
+    type Output = DMat3;
+}
+impl std::ops::Div<f64> for DMat3 {
+    fn div(self, rhs: f64) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::RemAssign<f64> for DMat3 {
+    fn rem_assign(&mut self, rhs: f64) { *self = *self % rhs }
+}
+impl std::ops::Rem<DMat3> for f64 {
+    fn rem(self, rhs: DMat3) -> Self::Output {
+        let DMat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = rhs;
+        DMat3::from_values(
+            self%a, self%b, self%c,
+            self%d, self%e, self%f,
+            self%g, self%h, self%i
+        )
+    }
+    type Output = DMat3;
+}
+impl std::ops::Rem<f64> for DMat3 {
+    fn rem(self, rhs: f64) -> Self::Output {
+        let DMat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = self;
+        DMat3::from_values(
+            a%rhs, b%rhs, c%rhs,
+            d%rhs, e%rhs, f%rhs,
+            g%rhs, h%rhs, i%rhs
+        )
+    }
+    type Output = Self;
+}
+impl std::ops::DivAssign<f64> for DMat3 {
+    fn div_assign(&mut self, rhs: f64) { *self = *self / rhs }
 }
 #[allow(clippy::needless_range_loop)]
 impl std::ops::Mul for DMat3{
@@ -152,17 +225,23 @@ impl std::ops::Mul for DMat3{
     }
     type Output = Self;
 }
-impl std::ops::MulAssign for DMat3{
-    fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs
-    }
+impl std::ops::MulAssign for DMat3 {
+    fn mul_assign(&mut self, rhs: Self) { *self = *self * rhs }
 }
-impl AsUniformValue for DMat3{
+#[allow(clippy::suspicious_arithmetic_impl)]
+impl std::ops::Div for DMat3 {
+    fn div(self, rhs: Self) -> Self::Output { self * rhs.inverse() }
+    type Output = Self;
+}
+impl std::ops::DivAssign for DMat3 {
+    fn div_assign(&mut self, rhs: Self) { *self = *self / rhs }
+}
+impl AsUniformValue for DMat3 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::DoubleMat3(self.matrix)
     }
 }
-impl std::ops::Add for DMat3{
+impl std::ops::Add for DMat3 {
     fn add(self, rhs: Self) -> Self::Output {
         let a = self.matrix;
         let b = rhs.matrix;
@@ -176,7 +255,7 @@ impl std::ops::Add for DMat3{
     }
     type Output = Self;
 }
-impl std::ops::AddAssign for DMat3{
+impl std::ops::AddAssign for DMat3 {
     fn add_assign(&mut self, rhs: Self) {
         let a = self.matrix;
         let b = rhs.matrix;
@@ -189,7 +268,7 @@ impl std::ops::AddAssign for DMat3{
         };
     }
 }
-impl std::ops::Sub for DMat3{
+impl std::ops::Sub for DMat3 {
     fn sub(self, rhs: Self) -> Self::Output {
         let a = self.matrix;
         let b = rhs.matrix;
@@ -201,7 +280,7 @@ impl std::ops::Sub for DMat3{
     }
     type Output = Self;
 }
-impl std::ops::SubAssign for DMat3{
+impl std::ops::SubAssign for DMat3 {
     fn sub_assign(&mut self, rhs: Self) {
         let a = self.matrix;
         let b = rhs.matrix;
@@ -212,7 +291,7 @@ impl std::ops::SubAssign for DMat3{
         ] };
     }
 }
-impl From<DMat4> for DMat3{
+impl From<DMat4> for DMat3 {
     fn from(value: DMat4) -> Self {
         Self::from_values(
             value[0][0], value[0][1], value[0][2],
@@ -221,7 +300,7 @@ impl From<DMat4> for DMat3{
         )
     }
 }
-impl From<DMat2> for DMat3{
+impl From<DMat2> for DMat3 {
     fn from(value: DMat2) -> Self {
         Self::from_values(
             value[0][0], value[0][1], 0.0,
@@ -240,14 +319,13 @@ impl From<DQuat> for DMat3 {
         )
     }
 }
-impl std::ops::Index<usize> for DMat3{
+impl std::ops::Index<usize> for DMat3 {
     fn index(&self, index: usize) -> &Self::Output {
         &self.matrix[index]
     }
-    
     type Output = [f64; 3];
 }
-impl std::ops::IndexMut<usize> for DMat3{
+impl std::ops::IndexMut<usize> for DMat3 {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.matrix[index]
     }

@@ -1,7 +1,7 @@
 use derive_cmp_ops::CmpOps;
 use glium::uniforms::AsUniformValue;
 use crate::prelude::Mat3;
-use super::{vec2::{vec2, Vec2}, vec4::{vec4, Vec4}};
+use super::{vec2::{vec2, Vec2}, vec4::{vec4, Vec4}, bvec3::*};
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
 ///a vector made from a x, y and z coordinate.
 pub struct Vec3{
@@ -21,19 +21,11 @@ impl Vec3{
     ///the z axis
     pub const Z: Self = vec3(0.0, 0.0, 1.0);
 
-    pub fn new(x: f32, y: f32, z: f32) -> Self{
-        Self { x, y, z }
-    }
-    pub fn extend(self, w: f32) -> Vec4{
-        vec4(self.x, self.y, self.z, w)
-    }
-    pub fn truncate(self) -> Vec2{
-        vec2(self.x, self.y)
-    }
+    pub const fn new(x: f32, y: f32, z: f32) -> Self { Self { x, y, z } }
+    pub const fn extend(self, w: f32) -> Vec4 { vec4(self.x, self.y, self.z, w) }
+    pub const fn truncate(self) -> Vec2 { vec2(self.x, self.y) }
     ///create a vector where x, y and z equals `value`.
-    pub fn splat(value: f32) -> Self{
-        Self::new(value, value, value)
-    }
+    pub const fn splat(value: f32) -> Self { Self::new(value, value, value) }
 
     ///the length of the vector before being square rooted.
     pub fn length_squared(self) -> f32{
@@ -63,7 +55,7 @@ impl Vec3{
     /// let z = vec3(0.0, 0.0, 1.0);
     /// assert!(x.cross(y) == z);
     /// ```
-    pub fn cross(&self, other: Vec3) -> Vec3{
+    pub fn cross(self, other: Vec3) -> Vec3{
         vec3(
             self.y*other.z - self.z*other.y,
             self.z*other.x - self.x*other.z,
@@ -81,13 +73,51 @@ impl Vec3{
         self.scale(1.0 / length)
     }
     ///transforms vector by the matrix
-    pub fn transform(self, matrix: &Mat3) -> Self{
+    pub fn transform(self, matrix: Mat3) -> Self{
         let a: Vec3 = matrix.row(0).into();
         let b: Vec3 = matrix.row(1).into();
         let c: Vec3 = matrix.row(2).into();
         vec3(a.dot(self), b.dot(self), c.dot(self))
     }
+    /// returns whether the 2 components are equal
+    pub fn eq(self, rhs: Self) -> BVec3 { bvec3(self.x == rhs.x, self.y == rhs.y, self.z == rhs.z) }
+    /// returns whether the 1st components are less than the 2nd
+    pub fn less(self, rhs: Self) -> BVec3 { bvec3(self.x < rhs.x, self.y < rhs.y, self.z < rhs.z) }
+    /// returns whether the 1st components are more than the 2nd
+    pub fn more(self, rhs: Self) -> BVec3 { bvec3(self.x > rhs.x, self.y > rhs.y, self.z > rhs.z) }
+    /// returns whether the 1st components are less than or equal to the 2nd
+    pub fn less_or_eq(self, rhs: Self) -> BVec3 { bvec3(self.x <= rhs.x, self.y <= rhs.y, self.z <= rhs.z) }
+    /// returns whether the 1st components are more than or equal to the 2nd
+    pub fn more_or_eq(self, rhs: Self) -> BVec3 { bvec3(self.x >= rhs.x, self.y >= rhs.y, self.z >= rhs.z) }
 }
+impl std::ops::Mul<Vec3> for f32 {
+    fn mul(self, rhs: Vec3) -> Self::Output { rhs * self }
+    type Output = Vec3;
+}
+impl std::ops::Mul<f32> for Vec3 {
+    fn mul(self, rhs: f32) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::MulAssign<f32> for Vec3 { fn mul_assign(&mut self, rhs: f32) { *self = *self * rhs } }
+impl std::ops::Div<Vec3> for f32 {
+    fn div(self, rhs: Vec3) -> Self::Output { Vec3::splat(self) / rhs }
+    type Output = Vec3;
+}
+impl std::ops::Div<f32> for Vec3 {
+    fn div(self, rhs: f32) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::DivAssign<f32> for Vec3 { fn div_assign(&mut self, rhs: f32) { *self = *self / rhs } }
+impl std::ops::Rem<Vec3> for f32 {
+    fn rem(self, rhs: Vec3) -> Self::Output { Vec3::splat(self) % rhs }
+    type Output = Vec3;
+}
+impl std::ops::Rem<f32> for Vec3 {
+    fn rem(self, rhs: f32) -> Self::Output { self % Vec3::splat(rhs) }
+    type Output = Self;
+}
+impl std::ops::RemAssign<f32> for Vec3 { fn rem_assign(&mut self, rhs: f32) { *self = *self % rhs } }
+
 impl AsUniformValue for Vec3{
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::Vec3([self.x, self.y, self.z])

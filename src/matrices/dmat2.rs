@@ -3,7 +3,7 @@ use crate::vectors::DVec2;
 use super::{DMat3, DMat4};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-///a matrix often used for transformations in glium.
+/// a matrix often used for transformations in glium.
 pub struct DMat2 {
     matrix: [[f64; 2]; 2]
 }
@@ -12,6 +12,10 @@ impl DMat2{
         1.0, 0.0,
         0.0, 1.0,
     );
+    pub const fn from_column_major_array(array: [[f64; 2]; 2]) -> Self { Self { matrix: array } }
+    pub const fn into_column_major_array(self) -> [[f64; 2]; 2] { self.matrix }
+    pub const fn from_row_major_array(array: [[f64; 2]; 2]) -> Self { Self { matrix: array }.transpose() }
+    pub const fn into_row_major_array(self) -> [[f64; 2]; 2] { self.transpose().matrix }
     pub const fn from_scale(scale: DVec2) -> Self{
         DMat2::from_values(
             scale.x, 0.0,
@@ -30,7 +34,7 @@ impl DMat2{
             rot.sin(), rot.cos()
         )
     }
-    ///creates a matrix with the following values.
+    /// creates a matrix with the following values
     /// ```
     /// use glium_types::matrices::DMat2;
     /// let new_matrix = DMat2::from_values(
@@ -62,7 +66,7 @@ impl DMat2{
             c * scalar, d * scalar
         )
     }
-    pub fn transpose(self) -> Self{
+    pub const fn transpose(self) -> Self{
         let DMat2 { matrix: [
             [a, c],
             [b, d]
@@ -107,7 +111,70 @@ impl Default for DMat2{
             [0.0, 1.0],
         ] }
     }
-    
+}
+impl std::ops::Mul<DVec2> for DMat2 {
+    fn mul(self, rhs: DVec2) -> Self::Output { rhs.transform(self) }
+    type Output = DVec2;
+}
+impl std::ops::Mul<DMat2> for f64 {
+    fn mul(self, rhs: DMat2) -> Self::Output { rhs * self }
+    type Output = DMat2;
+}
+impl std::ops::Mul<f64> for DMat2 {
+    fn mul(self, rhs: f64) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::MulAssign<f64> for DMat2 {
+    fn mul_assign(&mut self, rhs: f64) { *self = *self * rhs }
+}
+impl std::ops::Div<DMat2> for f64 {
+    fn div(self, rhs: DMat2) -> Self::Output {
+        let DMat2 { matrix: [
+            [a, c],
+            [b, d]
+        ]} = rhs;
+        DMat2::from_values(
+            self/a, self/b,
+            self/c, self/d
+        )
+    }
+    type Output = DMat2;
+}
+impl std::ops::Div<f64> for DMat2 {
+    fn div(self, rhs: f64) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::DivAssign<f64> for DMat2 {
+    fn div_assign(&mut self, rhs: f64) { *self = *self / rhs }
+}
+impl std::ops::Rem<DMat2> for f64 {
+    fn rem(self, rhs: DMat2) -> Self::Output {
+        let DMat2 { matrix: [
+            [a, c],
+            [b, d]
+        ]} = rhs;
+        DMat2::from_values(
+            self%a, self%b,
+            self%c, self%d
+        )
+    }
+    type Output = DMat2;
+}
+impl std::ops::Rem<f64> for DMat2 {
+    fn rem(self, rhs: f64) -> Self::Output {
+        let DMat2 { matrix: [
+            [a, c],
+            [b, d]
+        ]} = self;
+        DMat2::from_values(
+            a%rhs, b%rhs,
+            c%rhs, d%rhs
+        )
+    }
+    type Output = Self;
+}
+impl std::ops::RemAssign<f64> for DMat2 {
+    fn rem_assign(&mut self, rhs: f64) { *self = *self % rhs }
 }
 #[allow(clippy::needless_range_loop)]
 impl std::ops::Mul for DMat2{
@@ -124,10 +191,16 @@ impl std::ops::Mul for DMat2{
     }
     type Output = Self;
 }
-impl std::ops::MulAssign for DMat2{
-    fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs
-    }
+impl std::ops::MulAssign for DMat2 {
+    fn mul_assign(&mut self, rhs: Self) { *self = *self * rhs }
+}
+#[allow(clippy::suspicious_arithmetic_impl)]
+impl std::ops::Div for DMat2 {
+    fn div(self, rhs: Self) -> Self::Output { self * rhs.inverse() }
+    type Output = Self;
+}
+impl std::ops::DivAssign for DMat2 {
+    fn div_assign(&mut self, rhs: Self) { *self = *self / rhs }
 }
 impl AsUniformValue for DMat2{
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {

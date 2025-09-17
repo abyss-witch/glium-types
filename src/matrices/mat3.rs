@@ -4,7 +4,7 @@ use crate::{matrices::Mat4, quaternions::Quat, vectors::{Vec3, Vec2}};
 use super::Mat2;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-///a matrix often used for transformations in glium.
+/// a matrix often used for transformations in glium
 pub struct Mat3 {
     matrix: [[f32; 3]; 3]
 }
@@ -14,7 +14,11 @@ impl Mat3{
         0.0, 1.0, 0.0,
         0.0, 0.0, 1.0,
     );
-    pub const fn from_scale(scale: Vec3) -> Self{
+    pub const fn from_colum_major_array(array: [[f32; 3]; 3]) -> Self { Self { matrix: array } }
+    pub const fn into_column_major_array(self) -> [[f32; 3]; 3] { self.matrix }
+    pub const fn from_row_major_array(array: [[f32; 3]; 3]) -> Self { Self { matrix: array }.transpose() }
+    pub const fn into_row_major_array(self) -> [[f32; 3]; 3] { self.transpose().matrix }
+    pub const fn from_scale(scale: Vec3) -> Self {
         let (x, y, z) = (scale.x, scale.y, scale.z);
         Mat3::from_values(
             x, 0.0, 0.0,
@@ -38,9 +42,7 @@ impl Mat3{
             sx*(i*k - j*r), sy*(j*k + i*r), sz*(0.5 - (i*i + j*j)) 
         )
     }
-    pub fn from_rot(rot: Quat) -> Self{
-        rot.into()
-    }
+    pub fn from_rot(rot: Quat) -> Self { rot.into() }
     ///creates a matrix with the following values.
     ///
     /// ```
@@ -59,7 +61,7 @@ impl Mat3{
         g: f32, h: f32, i: f32
         ) -> Self{
         Self{
-            //opengl uses a diffent matrix format to the input. this is why the order is shifted.
+            // opengl uses a diffent matrix format to the input. this is why the order is shifted.
             matrix: [
                 [a, d, g],
                 [b, e, h],
@@ -106,7 +108,7 @@ impl Mat3{
             C, -(a*h - b*g), a*e - b*d
         ).scale(scalar)
     }
-    pub fn transpose(self) -> Self {
+    pub const fn transpose(self) -> Self {
         let Mat3 { matrix: [
             [a, d, g],
             [b, e, h],
@@ -118,16 +120,16 @@ impl Mat3{
             c, f, i
         )
     }
-    pub const fn column(&self, pos: usize) -> [f32; 3]{
+    pub const fn column(&self, pos: usize) -> [f32; 3] {
         self.matrix[pos]
     }
-    pub const fn row(&self, pos: usize) -> [f32; 3]{
+    pub const fn row(&self, pos: usize) -> [f32; 3] {
         let matrix = self.matrix;
         [matrix[0][pos], matrix[1][pos], matrix[2][pos]]
     }
 }
 
-impl Default for Mat3{
+impl Default for Mat3 {
     fn default() -> Self {
         Self { matrix: [
             [1.0, 0.0, 0.0,],
@@ -136,6 +138,76 @@ impl Default for Mat3{
         ] }
     }
     
+}
+impl std::ops::Mul<Vec3> for Mat3 {
+    fn mul(self, rhs: Vec3) -> Self::Output { rhs.transform(self) }
+    type Output = Vec3;
+}
+impl std::ops::Mul<f32> for Mat3 {
+    fn mul(self, rhs: f32) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::Mul<Mat3> for f32 {
+    fn mul(self, rhs: Mat3) -> Self::Output { rhs * self }
+    type Output = Mat3;
+}
+impl std::ops::MulAssign<f32> for Mat3 {
+    fn mul_assign(&mut self, rhs: f32) { *self = *self * rhs }
+}
+impl std::ops::Div<Mat3> for f32 {
+    fn div(self, rhs: Mat3) -> Self::Output {
+        let Mat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = rhs;
+        Mat3::from_values(
+            self/a, self/b, self/c,
+            self/d, self/e, self/f,
+            self/g, self/h, self/i
+        )
+    }
+    type Output = Mat3;
+}
+impl std::ops::Div<f32> for Mat3 {
+    fn div(self, rhs: f32) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::DivAssign<f32> for Mat3 {
+    fn div_assign(&mut self, rhs: f32) { *self = *self / rhs }
+}
+impl std::ops::Rem<Mat3> for f32 {
+    fn rem(self, rhs: Mat3) -> Self::Output {
+        let Mat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = rhs;
+        Mat3::from_values(
+            self%a, self%b, self%c,
+            self%d, self%e, self%f,
+            self%g, self%h, self%i
+        )
+    }
+    type Output = Mat3;
+}
+impl std::ops::Rem<f32> for Mat3 {
+    fn rem(self, rhs: f32) -> Self::Output {
+        let Mat3 { matrix: [
+            [a, d, g],
+            [b, e, h],
+            [c, f, i],
+        ]} = self;
+        Mat3::from_values(
+            a%rhs, b%rhs, c%rhs,
+            d%rhs, e%rhs, f%rhs,
+            g%rhs, h%rhs, i%rhs
+        )
+    }
+    type Output = Self;
+}
+impl std::ops::RemAssign<f32> for Mat3 {
+    fn rem_assign(&mut self, rhs: f32) { *self = *self % rhs }
 }
 #[allow(clippy::needless_range_loop)]
 impl std::ops::Mul for Mat3{
@@ -152,12 +224,18 @@ impl std::ops::Mul for Mat3{
     }
     type Output = Self;
 }
-impl std::ops::MulAssign for Mat3{
-    fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs
-    }
+impl std::ops::MulAssign for Mat3 {
+    fn mul_assign(&mut self, rhs: Self) { *self = *self * rhs }
 }
-impl AsUniformValue for Mat3{
+#[allow(clippy::suspicious_arithmetic_impl)]
+impl std::ops::Div for Mat3 {
+    fn div(self, rhs: Self) -> Self::Output { self * rhs.inverse() }
+    type Output = Self;
+}
+impl std::ops::DivAssign for Mat3 {
+    fn div_assign(&mut self, rhs: Self) { *self = *self / rhs }
+}
+impl AsUniformValue for Mat3 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::Mat3(self.matrix)
     }
@@ -244,7 +322,6 @@ impl std::ops::Index<usize> for Mat3{
     fn index(&self, index: usize) -> &Self::Output {
         &self.matrix[index]
     }
-    
     type Output = [f32; 3];
 }
 impl std::ops::IndexMut<usize> for Mat3{

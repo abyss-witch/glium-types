@@ -1,7 +1,7 @@
 use derive_cmp_ops::CmpOps;
 use glium::uniforms::AsUniformValue;
-use crate::prelude::Mat3;
-use super::{vec3::Vec3, dvec2::{dvec2, DVec2}, dvec4::{dvec4, DVec4}};
+use crate::matrices::DMat3;
+use super::{vec3::Vec3, dvec2::{dvec2, DVec2}, dvec4::{dvec4, DVec4}, bvec3::*};
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, CmpOps)]
 ///a double vector made from a x, y and z coordinate.
 pub struct DVec3{
@@ -21,19 +21,11 @@ impl DVec3{
     ///the z axis
     pub const Z: Self = dvec3(0.0, 0.0, 1.0);
 
-    pub fn new(x: f64, y: f64, z: f64) -> Self{
-        Self { x, y, z }
-    }
-    pub fn extend(self, w: f64) -> DVec4{
-        dvec4(self.x, self.y, self.z, w)
-    }
-    pub fn truncate(self) -> DVec2{
-        dvec2(self.x, self.y)
-    }
+    pub const fn new(x: f64, y: f64, z: f64) -> Self { Self { x, y, z } }
+    pub const fn extend(self, w: f64) -> DVec4 { dvec4(self.x, self.y, self.z, w) }
+    pub const fn truncate(self) -> DVec2 { dvec2(self.x, self.y) }
     ///create a vector where x, y and z equals `value`.
-    pub fn splat(value: f64) -> Self{
-        Self::new(value, value, value)
-    }
+    pub const fn splat(value: f64) -> Self { Self::new(value, value, value) }
 
     ///the length of the vector before being square rooted.
     pub fn length_squared(self) -> f64{
@@ -63,7 +55,7 @@ impl DVec3{
     /// let z = dvec3(0.0, 0.0, 1.0);
     /// assert!(x.cross(y) == z);
     /// ```
-    pub fn cross(&self, other: DVec3) -> DVec3{
+    pub fn cross(self, other: DVec3) -> DVec3{
         dvec3(
             self.y*other.z - self.z*other.y,
             self.z*other.x - self.x*other.z,
@@ -81,13 +73,51 @@ impl DVec3{
         self.scale(1.0 / length)
     }
     ///transforms vector by the matrix
-    pub fn transform(self, matrix: &Mat3) -> Self{
+    pub fn transform(self, matrix: DMat3) -> Self{
         let a: DVec3 = matrix.row(0).into();
         let b: DVec3 = matrix.row(1).into();
         let c: DVec3 = matrix.row(2).into();
         dvec3(a.dot(self), b.dot(self), c.dot(self))
     }
+    /// returns whether the 2 components are equal
+    pub fn eq(self, rhs: Self) -> BVec3 { bvec3(self.x == rhs.x, self.y == rhs.y, self.z == rhs.z) }
+    /// returns whether the 1st components are less than the 2nd
+    pub fn less(self, rhs: Self) -> BVec3 { bvec3(self.x < rhs.x, self.y < rhs.y, self.z < rhs.z) }
+    /// returns whether the 1st components are more than the 2nd
+    pub fn more(self, rhs: Self) -> BVec3 { bvec3(self.x > rhs.x, self.y > rhs.y, self.z > rhs.z) }
+    /// returns whether the 1st components are less than or equal to the 2nd
+    pub fn less_or_eq(self, rhs: Self) -> BVec3 { bvec3(self.x <= rhs.x, self.y <= rhs.y, self.z <= rhs.z) }
+    /// returns whether the 1st components are more than or equal to the 2nd
+    pub fn more_or_eq(self, rhs: Self) -> BVec3 { bvec3(self.x >= rhs.x, self.y >= rhs.y, self.z >= rhs.z) } 
 }
+impl std::ops::Mul<DVec3> for f64 {
+    fn mul(self, rhs: DVec3) -> Self::Output { rhs * self }
+    type Output = DVec3;
+}
+impl std::ops::Mul<f64> for DVec3 {
+    fn mul(self, rhs: f64) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::MulAssign<f64> for DVec3 { fn mul_assign(&mut self, rhs: f64) { *self = *self * rhs } }
+impl std::ops::Div<DVec3> for f64 {
+    fn div(self, rhs: DVec3) -> Self::Output { DVec3::splat(self) / rhs }
+    type Output = DVec3;
+}
+impl std::ops::Div<f64> for DVec3 {
+    fn div(self, rhs: f64) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::DivAssign<f64> for DVec3 { fn div_assign(&mut self, rhs: f64) { *self = *self / rhs } }
+impl std::ops::Rem<DVec3> for f64 {
+    fn rem(self, rhs: DVec3) -> Self::Output { DVec3::splat(self) % rhs }
+    type Output = DVec3;
+}
+impl std::ops::Rem<f64> for DVec3 {
+    fn rem(self, rhs: f64) -> Self::Output { self % DVec3::splat(rhs) }
+    type Output = Self;
+}
+impl std::ops::RemAssign<f64> for DVec3 { fn rem_assign(&mut self, rhs: f64) { *self = *self % rhs } }
+
 impl AsUniformValue for DVec3{
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::DoubleVec3([self.x, self.y, self.z])

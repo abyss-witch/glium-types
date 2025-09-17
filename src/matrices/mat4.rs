@@ -5,7 +5,7 @@ use crate::{matrices::Mat3, prelude::{vec3, Vec4}, quaternions::Quat, vectors::V
 use super::Mat2;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-///a matrix often used for transformations in glium.
+/// a matrix often used for transformations in glium
 pub struct Mat4 {
     matrix: [[f32; 4]; 4]
 }
@@ -16,6 +16,10 @@ impl Mat4{
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
+    pub const fn from_column_major_array(array: [[f32; 4]; 4]) -> Self { Self { matrix: array } }
+    pub const fn into_column_major_array(self) -> [[f32; 4]; 4] { self.matrix }
+    pub const fn from_row_major_array(array: [[f32; 4]; 4]) -> Self { Self { matrix: array }.transpose() }
+    pub const fn into_row_major_array(self) -> [[f32; 4]; 4] { self.transpose().matrix }
     pub const fn from_scale(scale: Vec3) -> Self{
         let (x, y, z) = (scale.x, scale.y, scale.z);
         Mat4::from_values(
@@ -25,8 +29,8 @@ impl Mat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    // transform from position, scale and rotation. much quicker than multiplying
-    //  position * rot * scale matrices with the same result.
+    /// transform from position, scale and rotation. much quicker than multiplying
+    ///  position * rot * scale matrices while having the same result.
     pub fn from_transform(pos: Vec3, scale: Vec3, rot: Quat) -> Self{
         let Quat { r, i, j, k } = rot;
         let (sx, sy, sz) = (scale.x * 2.0, scale.y * 2.0, scale.z * 2.0);
@@ -37,7 +41,7 @@ impl Mat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    //makes inverse of transform, useful for making camera transform.
+    /// makes inverse of `from_transform`, useful for making camera transform.
     pub fn from_inverse_transform(pos: Vec3, scale: Vec3, rot: Quat) -> Self {
         let Quat { r, i, j, k } = rot;
         let Vec3 { x, y, z } = Vec3::ONE / scale;
@@ -102,8 +106,8 @@ impl Mat4{
     pub fn from_rot(rot: Quat) -> Self{
         rot.into()
     }
-    //rotates the matrixs components
-    pub fn tranpose(self) -> Self {
+    /// rotates the matrixs components
+    pub const fn transpose(self) -> Self {
         let Mat4 { matrix: [
             [a, e, i, m],
             [b, f, j, n],
@@ -117,27 +121,25 @@ impl Mat4{
             d, h, l, p
         )
     }
-    ///creates a 3d perspective matrix. known as `view` in the vertex shader.
-    pub fn view_matrix_3d(window_dimesnsions: (u32, u32), fov: f32, zfar: f32, znear: f32) -> Self{
+    /// creates a 3d perspective matrix. known as `perspective` in the supplied vertex shader.
+    pub fn perspective_3d(window_dimesnsions: (u32, u32), fov: f32, zfar: f32, znear: f32) -> Self {
         let (width, height) = window_dimesnsions;
         let aspect_ratio = height as f32 / width as f32;
         let f = 1.0 / (fov / 2.0).tan();
-        Self{
-            matrix: [
-                [f * aspect_ratio, 0.0,              0.0              , 0.0],
-                [         0.0    ,  f ,              0.0              , 0.0],
-                [         0.0    , 0.0,  (zfar+znear)/(zfar-znear)    , 1.0],
-                [         0.0    , 0.0, -(2.0*zfar*znear)/(zfar-znear), 0.0],
-            ]
-        }
+        Self { matrix: [
+            [f * aspect_ratio, 0.0,              0.0              , 0.0],
+            [         0.0    ,  f ,              0.0              , 0.0],
+            [         0.0    , 0.0,  (zfar+znear)/(zfar-znear)    , 1.0],
+            [         0.0    , 0.0, -(2.0*zfar*znear)/(zfar-znear), 0.0],
+        ] }
     }
-    ///creates a 2d perspective matrix. known as `view` in the vertex shader.
-    pub fn view_matrix_2d(window_dimesnsions: (u32, u32)) -> Self{
+    /// creates a 2d perspective matrix. known as `perspective` in the supplied vertex shader.
+    pub fn perspective_2d(window_dimesnsions: (u32, u32)) -> Self {
         let (width, height) = window_dimesnsions;
         let aspect_ratio = height as f32 / width as f32;
         Mat4::from_scale(vec3(aspect_ratio, 1.0, 1.0))
     }
-    ///creates a matrix with the following values.
+    /// creates a matrix with the following values.
     /// ```
     /// use glium_types::matrices::Mat4;
     /// let new_matrix = Mat4::from_values(
@@ -156,7 +158,7 @@ impl Mat4{
         m: f32, n: f32, o: f32, p: f32
         ) -> Self{
         Self{
-            //opengl uses a diffent matrix format to the input. this is why the order is shifted.
+            // opengl uses a diffent matrix format to the input. this is why the order is shifted.
             matrix: [
                 [a, e, i, m],
                 [b, f, j, n],
@@ -260,9 +262,84 @@ impl Default for Mat4{
             [0.0, 0.0, 0.0, 1.0],
         ] }
     }
-    
 }
-#[allow(clippy::needless_range_loop)] //in this case i think it look nicer :)
+impl std::ops::Mul<Vec4> for Mat4 {
+    fn mul(self, rhs: Vec4) -> Self::Output { rhs.transform(self) }
+    type Output = Vec4;
+}
+impl std::ops::MulAssign<f32> for Mat4 {
+    fn mul_assign(&mut self, rhs: f32) { *self = *self * rhs }
+}
+impl std::ops::Mul<f32> for Mat4 {
+    fn mul(self, rhs: f32) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::Mul<Mat4> for f32 {
+    fn mul(self, rhs: Mat4) -> Self::Output { rhs * self }
+    type Output = Mat4;
+}
+impl std::ops::DivAssign<f32> for Mat4 {
+    fn div_assign(&mut self, rhs: f32) { *self = *self / rhs }
+}
+impl std::ops::Div<f32> for Mat4 {
+    fn div(self, rhs: f32) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::Div<Mat4> for f32 {
+    fn div(self, rhs: Mat4) -> Self::Output {
+        let Mat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = rhs;
+        Mat4::from_values(
+            self/a, self/b, self/c, self/d,
+            self/e, self/f, self/g, self/h,
+            self/i, self/j, self/k, self/l,
+            self/m, self/n, self/o, self/p
+        )
+    }
+    type Output = Mat4;
+}
+impl std::ops::RemAssign<f32> for Mat4 {
+    fn rem_assign(&mut self, rhs: f32) { *self = *self % rhs }
+}
+impl std::ops::Rem<f32> for Mat4 {
+    fn rem(self, rhs: f32) -> Self::Output {
+        let Mat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = self;
+        Mat4::from_values(
+            a%rhs, b%rhs, c%rhs, d%rhs,
+            e%rhs, f%rhs, g%rhs, h%rhs,
+            i%rhs, j%rhs, k%rhs, l%rhs,
+            m%rhs, n%rhs, o%rhs, p%rhs
+        )
+    }
+    type Output = Self;
+}
+impl std::ops::Rem<Mat4> for f32 {
+    fn rem(self, rhs: Mat4) -> Self::Output {
+        let Mat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = rhs;
+        Mat4::from_values(
+            self%a, self%b, self%c, self%d,
+            self%e, self%f, self%g, self%h,
+            self%i, self%j, self%k, self%l,
+            self%m, self%n, self%o, self%p
+        )
+    }
+    type Output = Mat4;
+}
+#[allow(clippy::needless_range_loop)] // in this case i think it looks nicer :)
 impl std::ops::Mul for Mat4{
     fn mul(self, rhs: Self) -> Self::Output {
         let mut matrix = [[0.0; 4];  4];
@@ -278,9 +355,15 @@ impl std::ops::Mul for Mat4{
     type Output = Self;
 }
 impl std::ops::MulAssign for Mat4{
-    fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs
-    }
+    fn mul_assign(&mut self, rhs: Self) { *self = *self * rhs }
+}
+#[allow(clippy::suspicious_arithmetic_impl)]
+impl std::ops::Div for Mat4{
+    fn div(self, rhs: Self) -> Self::Output { self * rhs.inverse() }
+    type Output = Self;
+}
+impl std::ops::DivAssign for Mat4{
+    fn div_assign(&mut self, rhs: Self) { *self = *self / rhs }
 }
 impl AsUniformValue for Mat4{
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
@@ -370,41 +453,44 @@ impl std::ops::IndexMut<usize> for Mat4{
         &mut self.matrix[index]
     }
 }
-#[test]
-fn test_from_inverse_transform() {
-    let rot = Quat::from_x_rot(1.3);
-    let pos = vec3(1.0, 2.0, 0.3);
-    let scale = vec3(1.1, 2.0, 3.9);
-    let transform = Mat4::from_transform(pos, scale, rot);
-    let inv_transform = Mat4::from_inverse_transform(pos, scale, rot);
-    let result = transform * inv_transform;
-    assert!(eq_mats(Mat4::IDENTITY, result));
-}
-#[test]
-fn mat4_inverse() {
-    let rot = Quat::from_x_rot(1.3);
-    let pos = vec3(1.0, 2.0, 0.3);
-    let scale = vec3(1.1, 2.0, 3.9);
-    let a = Mat4::from_transform(pos, scale, rot);
-    assert!(eq_mats(Mat4::IDENTITY, a.inverse() * a));
-}
-#[test]
-fn test_transform(){
-    let rot = Quat::from_x_rot(1.3);
-    let pos = vec3(1.0, 2.0, 0.3);
-    let scale = vec3(1.1, 2.0, 3.9);
-    let transform = Mat4::from_transform(pos, scale, rot);
-    let result = Mat4::from_pos(pos) * Mat4::from_rot(rot) * Mat4::from_scale(scale);
-    assert!(eq_mats(transform, result))
-}
-#[allow(dead_code)]
-fn eq_mats(a: Mat4, b: Mat4) -> bool {
-    for x in 0..4 {
-        for y in 0..4 {
-            if f32::abs(a[x][y] - b[x][y]) > f32::EPSILON {
-                return false;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_from_inverse_transform() {
+        let rot = Quat::from_x_rot(1.3);
+        let pos = vec3(1.0, 2.0, 0.3);
+        let scale = vec3(1.1, 2.0, 3.9);
+        let transform = Mat4::from_transform(pos, scale, rot);
+        let inv_transform = Mat4::from_inverse_transform(pos, scale, rot);
+        let result = transform * inv_transform;
+        assert!(eq_mats(Mat4::IDENTITY, result));
+    }
+    #[test]
+    fn mat4_inverse() {
+        let rot = Quat::from_x_rot(1.3);
+        let pos = vec3(1.0, 2.0, 0.3);
+        let scale = vec3(1.1, 2.0, 3.9);
+        let a = Mat4::from_transform(pos, scale, rot);
+        assert!(eq_mats(Mat4::IDENTITY, a.inverse() * a));
+    }
+    #[test]
+    fn test_transform(){
+        let rot = Quat::from_x_rot(1.3);
+        let pos = vec3(1.0, 2.0, 0.3);
+        let scale = vec3(1.1, 2.0, 3.9);
+        let transform = Mat4::from_transform(pos, scale, rot);
+        let result = Mat4::from_pos(pos) * Mat4::from_rot(rot) * Mat4::from_scale(scale);
+        assert!(eq_mats(transform, result))
+    }
+    fn eq_mats(a: Mat4, b: Mat4) -> bool {
+        for x in 0..4 {
+            for y in 0..4 {
+                if f32::abs(a[x][y] - b[x][y]) > f32::EPSILON {
+                    return false;
+                }
             }
         }
+        true
     }
-    true
 }

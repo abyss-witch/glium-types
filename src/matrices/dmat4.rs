@@ -5,7 +5,7 @@ use crate::{matrices::DMat3, quaternions::DQuat, vectors::{dvec3, DVec4, DVec3}}
 use super::DMat2;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-///a matrix often used for transformations in glium.
+/// a matrix often used for transformations in glium.
 pub struct DMat4 {
     matrix: [[f64; 4]; 4]
 }
@@ -25,9 +25,13 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    // transform from position, scale and rotation. much quicker than multiplying
-    //  position * rot * scale matrices with the same result.
-    pub fn from_transform(pos: DVec3, scale: DVec3, rot: DQuat) -> Self{
+    pub const fn from_column_major_array(array: [[f64; 4]; 4]) -> Self { Self { matrix: array } }
+    pub const fn into_column_major_array(self) -> [[f64; 4]; 4] { self.matrix }
+    pub const fn from_row_major_array(array: [[f64; 4]; 4]) -> Self { Self { matrix: array }.transpose() }
+    pub const fn into_row_major_array(self) -> [[f64; 4]; 4] { self.transpose().matrix }
+    /// transform from position, scale and rotation. much quicker than multiplying
+    ///  position * rot * scale matrices while having the same result.
+    pub fn from_transform(pos: DVec3, scale: DVec3, rot: DQuat) -> Self {
         let DQuat { r, i, j, k } = rot;
         let (sx, sy, sz) = (scale.x * 2.0, scale.y * 2.0, scale.z * 2.0);
         DMat4::from_values(
@@ -37,7 +41,7 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    //makes inverse of transform, useful for making camera transform.
+    /// makes the inverse of `from_transform`, useful for making camera transform.
     pub fn from_inverse_transform(pos: DVec3, scale: DVec3, rot: DQuat) -> Self {
         let DQuat { r, i, j, k } = rot;
         let DVec3 { x, y, z } = DVec3::ONE / scale;
@@ -63,7 +67,7 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    pub fn from_pos_and_rot(pos: DVec3, rot: DQuat) -> Self{
+    pub fn from_pos_and_rot(pos: DVec3, rot: DQuat) -> Self {
         let (r, i, j, k) = (rot.r, rot.i, rot.j, rot.k);
         DMat4::from_values(
             1.0 - 2.0*(j*j + k*k), 2.0*(i*j - k*r), 2.0*(i*k + j*r), pos.x,
@@ -72,7 +76,7 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    pub const fn from_pos_and_scale(pos: DVec3, scale: DVec3) -> Self{
+    pub const fn from_pos_and_scale(pos: DVec3, scale: DVec3) -> Self {
         DMat4::from_values(
             scale.x, 0.0, 0.0, pos.x,
             0.0, scale.y, 0.0, pos.y,
@@ -80,7 +84,7 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    pub fn from_scale_and_rot(scale: DVec3, rot: DQuat) -> Self{
+    pub fn from_scale_and_rot(scale: DVec3, rot: DQuat) -> Self {
         let (r, i, j, k) = (rot.r, rot.i, rot.j, rot.k);
         let (sx, sy, sz) = (scale.x * 2.0, scale.y * 2.0, scale.z * 2.0);
         DMat4::from_values(
@@ -90,7 +94,7 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    pub const fn from_pos(pos: DVec3) -> Self{
+    pub const fn from_pos(pos: DVec3) -> Self {
         let (x, y, z) = (pos.x, pos.y, pos.z);
         DMat4::from_values(
             1.0, 0.0, 0.0, x,
@@ -99,11 +103,11 @@ impl DMat4{
             0.0, 0.0, 0.0, 1.0
         )
     }
-    pub fn from_rot(rot: DQuat) -> Self{
+    pub fn from_rot(rot: DQuat) -> Self {
         rot.into()
     }
-    //rotates the matrixs components
-    pub fn tranpose(self) -> Self {
+    /// rotates the matrixs components
+    pub const fn transpose(self) -> Self {
         let DMat4 { matrix: [
             [a, e, i, m],
             [b, f, j, n],
@@ -117,8 +121,8 @@ impl DMat4{
             d, h, l, p
         )
     }
-    ///creates a 3d perspective matrix. known as `view` in the vertex shader.
-    pub fn view_matrix_3d(window_dimesnsions: (u32, u32), fov: f64, zfar: f64, znear: f64) -> Self{
+    /// creates a 3d perspective matrix. known as `perspective` in the supplied vertex shader
+    pub fn perspective_3d(window_dimesnsions: (u32, u32), fov: f64, zfar: f64, znear: f64) -> Self {
         let (width, height) = window_dimesnsions;
         let aspect_ratio = height as f64 / width as f64;
         let f = 1.0 / (fov / 2.0).tan();
@@ -131,13 +135,13 @@ impl DMat4{
             ]
         }
     }
-    ///creates a 2d perspective matrix. known as `view` in the vertex shader.
-    pub fn view_matrix_2d(window_dimesnsions: (u32, u32)) -> Self{
+    /// creates a 2d perspective matrix. known as `perspective` in the supplied vertex shader
+    pub fn perspective_2d(window_dimesnsions: (u32, u32)) -> Self {
         let (width, height) = window_dimesnsions;
         let aspect_ratio = height as f64 / width as f64;
         DMat4::from_scale(dvec3(aspect_ratio, 1.0, 1.0))
     }
-    ///creates a matrix with the following values.
+    /// creates a matrix with the following values
     /// ```
     /// use glium_types::matrices::DMat4;
     /// let new_matrix = DMat4::from_values(
@@ -154,9 +158,9 @@ impl DMat4{
         e: f64, f: f64, g: f64, h: f64,
         i: f64, j: f64, k: f64, l: f64,
         m: f64, n: f64, o: f64, p: f64
-        ) -> Self{
+    ) -> Self {
         Self{
-            //opengl uses a diffent matrix format to the input. this is why the order is shifted.
+            // opengl uses a diffent matrix format to the input. this is why the order is shifted.
             matrix: [
                 [a, e, i, m],
                 [b, f, j, n],
@@ -260,9 +264,84 @@ impl Default for DMat4{
             [0.0, 0.0, 0.0, 1.0],
         ] }
     }
-    
 }
-#[allow(clippy::needless_range_loop)] //in this case i think it look nicer :)
+impl std::ops::Mul<DVec4> for DMat4 {
+    fn mul(self, rhs: DVec4) -> Self::Output { rhs.transform(self) }
+    type Output = DVec4;
+}
+impl std::ops::Mul<DMat4> for f64 {
+    fn mul(self, rhs: DMat4) -> Self::Output { rhs * self }
+    type Output = DMat4;
+}
+impl std::ops::Mul<f64> for DMat4 {
+    fn mul(self, rhs: f64) -> Self::Output { self.scale(rhs) }
+    type Output = Self;
+}
+impl std::ops::MulAssign<f64> for DMat4 {
+    fn mul_assign(&mut self, rhs: f64) { *self = *self * rhs }
+}
+impl std::ops::Div<DMat4> for f64 {
+    fn div(self, rhs: DMat4) -> Self::Output {
+        let DMat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = rhs;
+        DMat4::from_values(
+            self/a, self/b, self/c, self/d,
+            self/e, self/f, self/g, self/h,
+            self/i, self/j, self/k, self/l,
+            self/m, self/n, self/o, self/p
+        )
+    }
+    type Output = DMat4;
+}
+impl std::ops::Div<f64> for DMat4 {
+    fn div(self, rhs: f64) -> Self::Output { self.scale(1.0/rhs) }
+    type Output = Self;
+}
+impl std::ops::DivAssign<f64> for DMat4 {
+    fn div_assign(&mut self, rhs: f64) { *self = *self / rhs }
+}
+impl std::ops::Rem<DMat4> for f64 {
+    fn rem(self, rhs: DMat4) -> Self::Output {
+        let DMat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = rhs;
+        DMat4::from_values(
+            self%a, self%b, self%c, self%d,
+            self%e, self%f, self%g, self%h,
+            self%i, self%j, self%k, self%l,
+            self%m, self%n, self%o, self%p
+        )
+    }
+    type Output = DMat4;
+}
+impl std::ops::Rem<f64> for DMat4 {
+    fn rem(self, rhs: f64) -> Self::Output {
+        let DMat4 { matrix: [
+            [a, e, i, m],
+            [b, f, j, n],
+            [c, g, k, o],
+            [d, h, l, p]
+        ] } = self;
+        DMat4::from_values(
+            a%rhs, b%rhs, c%rhs, d%rhs,
+            e%rhs, f%rhs, g%rhs, h%rhs,
+            i%rhs, j%rhs, k%rhs, l%rhs,
+            m%rhs, n%rhs, o%rhs, p%rhs
+        )
+    }
+    type Output = Self;
+}
+impl std::ops::RemAssign<f64> for DMat4 {
+    fn rem_assign(&mut self, rhs: f64) { *self = *self % rhs }
+}
+#[allow(clippy::needless_range_loop)] // in this case i think it looks nicer :)
 impl std::ops::Mul for DMat4{
     fn mul(self, rhs: Self) -> Self::Output {
         let mut matrix = [[0.0; 4];  4];
@@ -277,17 +356,23 @@ impl std::ops::Mul for DMat4{
     }
     type Output = Self;
 }
-impl std::ops::MulAssign for DMat4{
-    fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs
-    }
+impl std::ops::MulAssign for DMat4 {
+    fn mul_assign(&mut self, rhs: Self) { *self = *self * rhs }
 }
-impl AsUniformValue for DMat4{
+#[allow(clippy::suspicious_arithmetic_impl)]
+impl std::ops::Div for DMat4 {
+    fn div(self, rhs: Self) -> Self::Output { self * rhs.inverse() }
+    type Output = Self;
+}
+impl std::ops::DivAssign for DMat4 {
+    fn div_assign(&mut self, rhs: Self) { *self = *self / rhs }
+}
+impl AsUniformValue for DMat4 {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::DoubleMat4(self.matrix)
     }
 }
-impl std::ops::Add for DMat4{
+impl std::ops::Add for DMat4 {
     fn add(self, rhs: Self) -> Self::Output {
         let a = self.matrix;
         let b = rhs.matrix;
@@ -302,12 +387,12 @@ impl std::ops::Add for DMat4{
     }
     type Output = Self;
 }
-impl std::ops::AddAssign for DMat4{
+impl std::ops::AddAssign for DMat4 {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs
     }
 }
-impl std::ops::Sub for DMat4{
+impl std::ops::Sub for DMat4 {
     fn sub(self, rhs: Self) -> Self::Output {
         let a = self.matrix;
         let b = rhs.matrix;
@@ -322,12 +407,12 @@ impl std::ops::Sub for DMat4{
     }
     type Output = Self;
 }
-impl std::ops::SubAssign for DMat4{
+impl std::ops::SubAssign for DMat4 {
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs
     }
 }
-impl From<DMat3> for DMat4{
+impl From<DMat3> for DMat4 {
     fn from(value: DMat3) -> Self {
         Self::from_values(
             value[0][0], value[0][1], value[0][2], 0.0,
@@ -337,7 +422,7 @@ impl From<DMat3> for DMat4{
         )
     }
 }
-impl From<DMat2> for DMat4{
+impl From<DMat2> for DMat4 {
     fn from(value: DMat2) -> Self {
         Self::from_values(
             value[0][0], value[0][1], 0.0, 0.0,
@@ -358,14 +443,14 @@ impl From<DQuat> for DMat4 {
         )
     }
 }
-impl std::ops::Index<usize> for DMat4{
+impl std::ops::Index<usize> for DMat4 {
     fn index(&self, index: usize) -> &Self::Output {
         &self.matrix[index]
     }
     
     type Output = [f64; 4];
 }
-impl std::ops::IndexMut<usize> for DMat4{
+impl std::ops::IndexMut<usize> for DMat4 {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.matrix[index]
     }
